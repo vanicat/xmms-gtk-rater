@@ -54,7 +54,7 @@ class XmmsInteract < DelegateClass(Xmms::Client)
   end
 
   def add_song_info(id, info)
-    iter = @list.append
+    iter = @list.prepend
     iter[0]=id
     iter[1]=get(info, :title, "UNKNOW")
     iter[2]=get(info, :artist, "UNKNOW")
