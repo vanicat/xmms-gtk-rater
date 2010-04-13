@@ -13,6 +13,12 @@ end
 class XmmsInteract < DelegateClass(Xmms::Client)
   attr_reader :list
 
+  def get(info, attr, default=nil)
+    info[attr].map[0][1]
+  rescue NoMethodError => e
+    default
+  end
+
   def initialize()
     begin
       @xc = Xmms::Client.new('Rater').connect(ENV['XMMS_PATH'])
@@ -26,6 +32,19 @@ class XmmsInteract < DelegateClass(Xmms::Client)
     # TODO: handler for future deconection
 
     @list = Gtk::ListStore.new(Integer,String, String, String, Integer)
+
+    @xc.broadcast_playback_current_id.notifier do |id|
+      @xc.medialib_get_info(id).notifier do |res|
+        iter = @list.append
+        iter[0]=id
+        iter[1]=get(res, :title, "UNKNOW")
+        iter[2]=get(res, :artist, "UNKNOW")
+        iter[3]=get(res, :album, "UNKNOW")
+        iter[4]=get(res, :rating, "UNKNOW").to_i
+        false
+      end
+      true
+    end
   end
 end
 
