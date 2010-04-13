@@ -160,18 +160,23 @@ class UserInteract
     @view.append_column(col)
 
     for i in 1..5
-      renderer = Gtk::CellRendererToggle.new
-      renderer.activatable = true
-      col = Gtk::TreeViewColumn.new(i.to_s,renderer, :active => i+4)
-      col.expand=false
-      col.max_width = 20
+      col=initialize_rater_toggle(i)
       @view.append_column(col)
     end
 
     return scroll
   end
 
-
+  def initialize_rater_toggle(i)
+    renderer = Gtk::CellRendererToggle.new
+    renderer.activatable = true
+    renderer.signal_connect('toggled') do |w,path|
+      @xc.rate(path,i)
+    end
+    col = Gtk::TreeViewColumn.new(i.to_s,renderer, :active => i+4)
+    col.expand=false
+    return col
+  end
 end
 
 user = UserInteract.new()
