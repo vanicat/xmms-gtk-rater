@@ -4,13 +4,15 @@ require 'xmmsclient'
 require 'xmmsclient_glib'
 require 'glib2'
 require 'gtk2'
+require 'delegate'
 
 def debug(*arg)
   puts(*arg)
 end
 
 class XmmsInteract < DelegateClass(Xmms::Client)
-  include Singleton
+  attr_reader :list
+
   def initialize()
     begin
       @xc = Xmms::Client.new('Rater').connect(ENV['XMMS_PATH'])
@@ -22,5 +24,36 @@ class XmmsInteract < DelegateClass(Xmms::Client)
     super(@xc)
     @xc.add_to_glib_mainloop
     # TODO: handler for future deconection
+
+    @list = Gtk::ListStore.new(String, String, String, Integer)
   end
 end
+
+class UserInteract
+
+  def initialize()
+    @xc = XmmsInteract.new()
+    @window = Gtk::Window.new()
+    @view = Gtk::TreeView.new(@xc.list)
+    @window.add(@view)
+
+    renderer = Gtk::CellRendererText.new
+    col = Gtk::TreeViewColumn.new("Title",renderer, :text => 0)
+    @view.append_column(col)
+    renderer = Gtk::CellRendererText.new
+    col = Gtk::TreeViewColumn.new("Album",renderer, :text => 1)
+    @view.append_column(col)
+    renderer = Gtk::CellRendererText.new
+    col = Gtk::TreeViewColumn.new("Artist",renderer, :text => 2)
+    @view.append_column(col)
+    renderer = Gtk::CellRendererText.new
+    col = Gtk::TreeViewColumn.new("Rating",renderer, :text => 3)
+    @view.append_column(col)
+
+    @window.show_all
+  end
+end
+
+user = UserInteract.new()
+
+Gtk.main
