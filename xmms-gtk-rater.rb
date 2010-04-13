@@ -77,6 +77,7 @@ class XmmsInteract < DelegateClass(Xmms::Client)
         erase_rating_with_id(id)
         false
       end
+      @list.iter_first[4]=0
     end
   end
 
@@ -95,6 +96,7 @@ class XmmsInteract < DelegateClass(Xmms::Client)
         rate_with_id(id,rate)
         false
       end
+      @list.iter_first[4]=rate
     end
   end
 
