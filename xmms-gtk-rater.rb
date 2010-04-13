@@ -1,15 +1,16 @@
 #!/usr/bin/env ruby
 
 require 'xmmsclient'
+require 'xmmsclient_glib'
+require 'glib2'
 require 'gtk2'
 
 def debug(*arg)
   puts(*arg)
 end
 
-class Interact
+class XmmsInteract < DelegateClass(Xmms::Client)
   include Singleton
-
   def initialize()
     begin
       @xc = Xmms::Client.new('Rater').connect(ENV['XMMS_PATH'])
@@ -18,11 +19,8 @@ class Interact
       puts 'Please make sure xmms2d is running and using the correct IPC path.'
       exit
     end
-  end
-
-  def method_missing(method, *args, &block)
-    @xc.send(method, *args, &block)
+    super(@xc)
+    @xc.add_to_glib_mainloop
+    # TODO: handler for future deconection
   end
 end
-
-
