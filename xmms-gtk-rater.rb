@@ -31,7 +31,7 @@ class XmmsInteract < DelegateClass(Xmms::Client)
     @xc.add_to_glib_mainloop
     # TODO: handler for future deconection
 
-    @list = Gtk::ListStore.new(Integer,String, String, String, Integer)
+    @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
 
     @xc.playback_current_id.notifier do |id|
       add_song(id)
@@ -59,7 +59,14 @@ class XmmsInteract < DelegateClass(Xmms::Client)
     iter[1]=get(info, :title, "UNKNOW")
     iter[2]=get(info, :artist, "UNKNOW")
     iter[3]=get(info, :album, "UNKNOW")
-    iter[4]=get(info, :rating, "UNKNOW").to_i
+    update_rating(iter,get(info, :rating, "UNKNOW").to_i)
+  end
+
+  def update_rating(iter,rate)
+    iter[4]=rate
+    for i in [0,1,2,3,4]
+      iter[5+i] = rate > i
+    end
   end
 
   def erase_rating_with_id(id)
@@ -71,13 +78,13 @@ class XmmsInteract < DelegateClass(Xmms::Client)
   def erase_rating(iter)
     if iter
       erase_rating_with_id(iter[0])
-      iter[4]=0
+      update_rating(iter,0)
    else
       @xc.playback_current_id.notifier do |id|
         erase_rating_with_id(id)
         false
       end
-      @list.iter_first[4]=0
+      update_rating(@list.iter_first,0)
     end
   end
 
@@ -90,13 +97,13 @@ class XmmsInteract < DelegateClass(Xmms::Client)
   def rate(iter,rate)
     if iter
       rate_with_id(iter[0],rate)
-      iter[4]=rate
+      update_rating(iter,rate)
     else
       @xc.playback_current_id.notifier do |id|
         rate_with_id(id,rate)
         false
       end
-      @list.iter_first[4]=rate
+      update_rating(@list.iter_first,rate)
     end
   end
 
@@ -153,6 +160,15 @@ class UserInteract
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("Rating",renderer, :text => 4)
     @view.append_column(col)
+
+    for i in 1..5
+      renderer = Gtk::CellRendererToggle.new
+      renderer.activatable = true
+      col = Gtk::TreeViewColumn.new(i.to_s,renderer, :active => i+4)
+      col.expand=false
+      col.max_width = 20
+      @view.append_column(col)
+    end
 
     return scroll
   end
