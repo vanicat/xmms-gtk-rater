@@ -34,18 +34,29 @@ class XmmsInteract < DelegateClass(Xmms::Client)
     @list = Gtk::ListStore.new(Integer,String, String, String, Integer)
 
     @xc.broadcast_playback_current_id.notifier do |id|
-      @xc.medialib_get_info(id).notifier do |res|
-        iter = @list.append
-        iter[0]=id
-        iter[1]=get(res, :title, "UNKNOW")
-        iter[2]=get(res, :artist, "UNKNOW")
-        iter[3]=get(res, :album, "UNKNOW")
-        iter[4]=get(res, :rating, "UNKNOW").to_i
-        false
-      end
+      add_song(id)
       true
     end
   end
+
+  def add_song(id)
+    if id != 0
+      @xc.medialib_get_info(id).notifier do |res|
+        add_song_info(id,res)
+        false
+      end
+    end
+  end
+
+  def add_song_info(id, info)
+    iter = @list.append
+    iter[0]=id
+    iter[1]=get(info, :title, "UNKNOW")
+    iter[2]=get(info, :artist, "UNKNOW")
+    iter[3]=get(info, :album, "UNKNOW")
+    iter[4]=get(info, :rating, "UNKNOW").to_i
+  end
+
 end
 
 class UserInteract
