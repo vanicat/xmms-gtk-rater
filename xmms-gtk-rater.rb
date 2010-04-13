@@ -69,9 +69,31 @@ class UserInteract
   def initialize()
     @xc = XmmsInteract.new()
     @window = Gtk::Window.new()
+
+    view = initialize_tree()
+    bbox = initialize_bbox()
+
+    pack = Gtk::VBox.new()
+
+    @window.add(pack)
+    pack.pack_start(bbox,false,false,1)
+    pack.pack_start(view,true,true,1)
+
+
+    @window.signal_connect('delete_event') do
+      false
+    end
+
+    @window.signal_connect('destroy') do
+      Gtk.main_quit
+    end
+
+    @window.show_all
+  end
+
+  def initialize_tree
     @view = Gtk::TreeView.new(@xc.list)
     scroll = Gtk::ScrolledWindow.new()
-    @window.add(scroll)
     scroll.add(@view)
     scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC)
 
@@ -91,15 +113,28 @@ class UserInteract
     col = Gtk::TreeViewColumn.new("Rating",renderer, :text => 4)
     @view.append_column(col)
 
-    @window.signal_connect('delete_event') do
-      false
+    return scroll
+  end
+
+  def initialize_bbox
+    bbox = Gtk::HButtonBox.new()
+
+    button = Gtk::Button.new("No rating")
+    button.signal_connect("clicked") do
+      @xc.erase_rating()
+    end
+    bbox.pack_start(button,false,true,1)
+
+    for i in [1,2,3,4,5]
+      button = Gtk::Button.new(i.to_s)
+      button.signal_connect("clicked") do
+        @xc.rate(i)
+      end
+      bbox.pack_start(button,false,true,1)
     end
 
-    @window.signal_connect('destroy') do
-      Gtk.main_quit
-    end
+    return bbox
 
-    @window.show_all
   end
 end
 
