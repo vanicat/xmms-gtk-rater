@@ -25,7 +25,7 @@ class XmmsInteract < DelegateClass(Xmms::Client)
     @xc.add_to_glib_mainloop
     # TODO: handler for future deconection
 
-    @list = Gtk::ListStore.new(String, String, String, Integer)
+    @list = Gtk::ListStore.new(Integer,String, String, String, Integer)
   end
 end
 
@@ -38,16 +38,19 @@ class UserInteract
     @window.add(@view)
 
     renderer = Gtk::CellRendererText.new
-    col = Gtk::TreeViewColumn.new("Title",renderer, :text => 0)
+    col = Gtk::TreeViewColumn.new("id",renderer, :text => 0)
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
-    col = Gtk::TreeViewColumn.new("Album",renderer, :text => 1)
+    col = Gtk::TreeViewColumn.new("Title",renderer, :text => 1)
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
-    col = Gtk::TreeViewColumn.new("Artist",renderer, :text => 2)
+    col = Gtk::TreeViewColumn.new("Album",renderer, :text => 2)
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
-    col = Gtk::TreeViewColumn.new("Rating",renderer, :text => 3)
+    col = Gtk::TreeViewColumn.new("Artist",renderer, :text => 3)
+    @view.append_column(col)
+    renderer = Gtk::CellRendererText.new
+    col = Gtk::TreeViewColumn.new("Rating",renderer, :text => 4)
     @view.append_column(col)
 
     @window.show_all
