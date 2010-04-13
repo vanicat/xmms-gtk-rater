@@ -33,6 +33,11 @@ class XmmsInteract < DelegateClass(Xmms::Client)
 
     @list = Gtk::ListStore.new(Integer,String, String, String, Integer)
 
+    @xc.playback_current_id.notifier do |id|
+      add_song(id)
+      false
+    end
+
     @xc.broadcast_playback_current_id.notifier do |id|
       add_song(id)
       true
