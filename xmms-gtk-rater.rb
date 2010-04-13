@@ -94,16 +94,16 @@ class XmmsInteract < DelegateClass(Xmms::Client)
     end
   end
 
-  def rate(iter,rate)
-    if iter
+  def rate(path,rate)
+    iter=@list.get_iter(path)
+    if iter[4] == rate
+      rate = rate - 1
+    end
+    if rate == 0
+      erase_rating(iter)
+    else
       rate_with_id(iter[0],rate)
       update_rating(iter,rate)
-    else
-      @xc.playback_current_id.notifier do |id|
-        rate_with_id(id,rate)
-        false
-      end
-      update_rating(@list.iter_first,rate)
     end
   end
 
