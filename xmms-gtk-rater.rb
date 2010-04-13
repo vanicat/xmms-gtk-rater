@@ -140,12 +140,15 @@ class UserInteract
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("Title",renderer, :text => 1)
+    col.expand = true
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
-    col = Gtk::TreeViewColumn.new("Album",renderer, :text => 2)
+    col = Gtk::TreeViewColumn.new("Artist",renderer, :text => 2)
+    col.expand = true
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
-    col = Gtk::TreeViewColumn.new("Artist",renderer, :text => 3)
+    col = Gtk::TreeViewColumn.new("Album",renderer, :text => 3)
+    col.expand = true
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("Rating",renderer, :text => 4)
