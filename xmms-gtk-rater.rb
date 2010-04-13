@@ -54,7 +54,10 @@ class UserInteract
     @xc = XmmsInteract.new()
     @window = Gtk::Window.new()
     @view = Gtk::TreeView.new(@xc.list)
-    @window.add(@view)
+    scroll = Gtk::ScrolledWindow.new()
+    @window.add(scroll)
+    scroll.add(@view)
+    scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC)
 
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("id",renderer, :text => 0)
