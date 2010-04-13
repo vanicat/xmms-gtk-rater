@@ -53,6 +53,14 @@ class UserInteract
     col = Gtk::TreeViewColumn.new("Rating",renderer, :text => 4)
     @view.append_column(col)
 
+    @window.signal_connect('delete_event') do
+      false
+    end
+
+    @window.signal_connect('destroy') do
+      Gtk.main_quit
+    end
+
     @window.show_all
   end
 end
