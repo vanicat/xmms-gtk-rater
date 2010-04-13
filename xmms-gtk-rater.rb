@@ -116,12 +116,10 @@ class UserInteract
     @window = Gtk::Window.new()
 
     view = initialize_tree()
-    bbox = initialize_bbox()
 
     pack = Gtk::VBox.new()
 
     @window.add(pack)
-    pack.pack_start(bbox,false,false,1)
     pack.pack_start(view,true,true,1)
 
 
@@ -173,30 +171,7 @@ class UserInteract
     return scroll
   end
 
-  def initialize_bbox
-    bbox = Gtk::HButtonBox.new()
 
-    button = Gtk::Button.new("No rating")
-    button.signal_connect("clicked") do
-      @xc.erase_rating(@view.selection.selected)
-    end
-    bbox.pack_start(button,false,true,1)
-
-    for i in [1,2,3,4,5]
-      button = initialize_rater_button(i)
-      bbox.pack_start(button,false,true,1)
-    end
-
-    return bbox
-  end
-
-  def initialize_rater_button(i)
-    button = Gtk::Button.new(i.to_s)
-    button.signal_connect("clicked") do
-      @xc.rate(@view.selection.selected,i)
-    end
-    return button
-  end
 end
 
 user = UserInteract.new()
