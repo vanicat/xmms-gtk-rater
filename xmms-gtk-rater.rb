@@ -62,6 +62,42 @@ class XmmsInteract < DelegateClass(Xmms::Client)
     iter[4]=get(info, :rating, "UNKNOW").to_i
   end
 
+  def erase_rating_with_id(id)
+    @xc.medialib_entry_property_remove(id, :rating, "client/generic").notifier do
+       false
+    end
+  end
+
+  def erase_rating(iter)
+    if iter
+      erase_rating_with_id(iter[0])
+      iter[4]=0
+   else
+      @xc.playback_current_id.notifier do |id|
+        erase_rating_with_id(id)
+        false
+      end
+    end
+  end
+
+  def rate_with_id(id,rate)
+    @xc.medialib_entry_property_set(id, :rating, rate, "client/generic").notifier do
+      false
+    end
+  end
+
+  def rate(iter,rate)
+    if iter
+      rate_with_id(iter[0],rate)
+      iter[4]=rate
+    else
+      @xc.playback_current_id.notifier do |id|
+        rate_with_id(id,rate)
+        false
+      end
+    end
+  end
+
 end
 
 class UserInteract
