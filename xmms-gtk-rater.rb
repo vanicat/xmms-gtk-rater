@@ -134,18 +134,15 @@ class UserInteract
 
   def initialize_tree
     view = Gtk::TreeView.new(@xc.list)
-    table = Gtk::Table.new(1,2,false)
-    scrollbar = Gtk::VScrollbar.new()
-    view.vadjustment = scrollbar.adjustment
-
-    table.attach(view,1,2,1,2, Gtk::EXPAND|Gtk::FILL|Gtk::SHRINK, Gtk::EXPAND|Gtk::FILL|Gtk::SHRINK, 0, 0)
-    table.attach(scrollbar,2,3,1,2, 0, Gtk::EXPAND|Gtk::FILL|Gtk::SHRINK, 0, 0)
+    scroll = Gtk::ScrolledWindow.new()
+    scroll.add(view)
+    scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
 
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("id",renderer, :text => 0)
     view.append_column(col)
     renderer = Gtk::CellRendererText.new
-    search = col = Gtk::TreeViewColumn.new("Title",renderer, :text => 1)
+    col = Gtk::TreeViewColumn.new("Title",renderer, :text => 1)
     col.expand = true
     col.resizable = true
     view.append_column(col)
@@ -171,7 +168,7 @@ class UserInteract
 
     view.search_column=1
 
-    return table
+    return scroll
   end
 
   def initialize_rater_toggle(col,i)
