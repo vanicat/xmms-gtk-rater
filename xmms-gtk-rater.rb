@@ -13,6 +13,12 @@ class XmmsInteract
   attr_reader :list
   attr_reader :xc
 
+  COL_ID = 0
+  COL_TITLE = 1
+  COL_ARTIST = 2
+  COL_ALBUM = 3
+  COL_RATING = 4
+
   def get(info, attr, default=nil)
     info[attr].map[0][1]
   rescue NoMethodError => e
@@ -37,17 +43,17 @@ class XmmsInteract
 
   def add_song_info(id, info)
     iter = @list.prepend
-    iter[0]=id
-    iter[1]=get(info, :title, "UNKNOW")
-    iter[2]=get(info, :artist, "UNKNOW")
-    iter[3]=get(info, :album, "UNKNOW")
+    iter[COL_ID]=id
+    iter[COL_TITLE]=get(info, :title, "UNKNOW")
+    iter[COL_ARTIST]=get(info, :artist, "UNKNOW")
+    iter[COL_ALBUM]=get(info, :album, "UNKNOW")
     update_rating(iter,get(info, :rating, "UNKNOW").to_i)
   end
 
   def update_rating(iter,rate)
-    iter[4]=rate
-    for i in [0,1,2,3,4]
-      iter[5+i] = rate > i
+    iter[COL_RATING]=rate
+    for i in 1..5
+      iter[COL_RATING+i] = rate >= i
     end
   end
 
@@ -82,13 +88,13 @@ class XmmsInteract
     else
       iter=@list.get_iter(path)
     end
-    if iter[4] == rate
+    if iter[COL_RATING] == rate
       rate = rate - 1
     end
     if rate == 0
       erase_rating(iter)
     else
-      rate_with_id(iter[0],rate)
+      rate_with_id(iter[COL_ID],rate)
       update_rating(iter,rate)
     end
   end
@@ -222,19 +228,19 @@ class UserInteract
       menu = Gtk::Menu.new
       item = Gtk::MenuItem.new("Show same _artist")
       item.signal_connect("activate") {
-        user_same(@xc.xc, "artist", current_iter[2])
+        user_same(@xc.xc, "artist", current_iter[XmmsInteract::COL_ARTIST])
       }
       menu.append(item)
 
       item = Gtk::MenuItem.new("Show same al_bum")
       item.signal_connect("activate") {
-        user_same(@xc.xc, "album", current_iter[3])
+        user_same(@xc.xc, "album", current_iter[XmmsInteract::COL_ALBUM])
       }
       menu.append(item)
 
       item = Gtk::MenuItem.new("Show same _title")
       item.signal_connect("activate") {
-        user_same(@xc.xc, "title", current_iter[1])
+        user_same(@xc.xc, "title", current_iter[XmmsInteract::COL_TITLE])
       }
       menu.append(item)
 
@@ -257,15 +263,15 @@ class UserInteract
     scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
 
     renderer = Gtk::CellRendererText.new
-    col = Gtk::TreeViewColumn.new("id",renderer, :text => 0)
+    col = Gtk::TreeViewColumn.new("id",renderer, :text => XmmsInteract::COL_ID)
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
 
-    initialize_std_col("Title", 1)
+    initialize_std_col("Title", XmmsInteract::COL_TITLE)
 
-    initialize_std_col("Artist", 2)
+    initialize_std_col("Artist", XmmsInteract::COL_ARTIST)
 
-    initialize_std_col("Album", 3)
+    initialize_std_col("Album", XmmsInteract::COL_ALBUM)
 
     col = Gtk::TreeViewColumn.new("rating")
     for i in 1..5
@@ -274,7 +280,7 @@ class UserInteract
     col.expand=false
     @view.append_column(col)
 
-    @view.search_column=1
+    @view.search_column=XmmsInteract::COL_TITLE
 
     @view.signal_connect("button_press_event") do |widget, event|
       if event.kind_of? Gdk::EventButton and event.button == 3
@@ -299,7 +305,7 @@ class UserInteract
       @xc.rate(path,i)
     end
     col.pack_start(renderer,false)
-    col.add_attribute(renderer, :active, i+4)
+    col.add_attribute(renderer, :active, i+XmmsInteract::COL_RATING)
   end
 end
 
