@@ -107,6 +107,29 @@ class XmmsInteractPlayed < XmmsInteract
 
 end
 
+class XmmsInteractCollection < XmmsInteract
+
+  def initialize(xc,coll)
+    super(xc)
+
+    @xc.coll_query_ids(coll).notifier do |res|
+      res.each do |id|
+        add_song(id)
+      end
+      true
+    end
+  end
+end
+
+def xmms_same(xc, field, value)
+  coll = Xmms::Collection.new(Xmms::Collection::TYPE_EQUALS)
+  coll.attributes["field"]=field
+  coll.attributes["value"]=value
+  coll.operands<< Xmms::Collection.universe
+
+  return XmmsInteractCollection.new(xc, coll)
+end
+
 class UserInteract
 
   def initialize(xc)
@@ -182,6 +205,10 @@ class UserInteract
   end
 end
 
+
+def user_same(xc,field,value)
+  UserInteract.new(xmms_same(xc,field,value))
+end
 
 begin
   xc = Xmms::Client.new('Rater').connect(ENV['XMMS_PATH'])
