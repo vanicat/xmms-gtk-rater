@@ -163,6 +163,8 @@ class UserInteract
       @view.append_column(col)
     end
 
+    @view.search_column=1
+
     return scroll
   end
 
