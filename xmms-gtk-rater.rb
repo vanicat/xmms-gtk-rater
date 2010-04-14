@@ -137,9 +137,10 @@ end
 
 class UserInteract
 
-  def initialize(xc, main=false)
+  def initialize(xc, title, main=false)
     @xc = xc
     @window = Gtk::Window.new()
+    @window.title = title
 
     view = initialize_tree()
 
@@ -276,7 +277,7 @@ end
 
 
 def user_same(xc,field,value)
-  UserInteract.new(xmms_same(xc,field,value))
+  UserInteract.new(xmms_same(xc,field,value),"#{field}: #{value}")
 end
 
 begin
@@ -289,6 +290,6 @@ end
 
 xc.add_to_glib_mainloop
 
-user = UserInteract.new(XmmsInteractPlayed.new(xc),true)
+user = UserInteract.new(XmmsInteractPlayed.new(xc),"Xmms Rater", true)
 
 Gtk.main
