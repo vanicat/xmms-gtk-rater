@@ -77,7 +77,11 @@ class XmmsInteract
   end
 
   def rate(path,rate)
-    iter=@list.get_iter(path)
+    if path.is_a? Gtk::TreeIter
+      iter=path
+    else
+      iter=@list.get_iter(path)
+    end
     if iter[4] == rate
       rate = rate - 1
     end
