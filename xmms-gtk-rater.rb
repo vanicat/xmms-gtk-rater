@@ -137,7 +137,7 @@ class UserInteract
     @view = Gtk::TreeView.new(@xc.list)
     scroll = Gtk::ScrolledWindow.new()
     scroll.add(@view)
-    scroll.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC)
+    scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
 
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("id",renderer, :text => 0)
@@ -145,17 +145,17 @@ class UserInteract
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("Title",renderer, :text => 1)
     col.expand = true
+    col.resizable = true
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("Artist",renderer, :text => 2)
     col.expand = true
+    col.resizable = true
     @view.append_column(col)
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("Album",renderer, :text => 3)
     col.expand = true
-    @view.append_column(col)
-    renderer = Gtk::CellRendererText.new
-    col = Gtk::TreeViewColumn.new("Rating",renderer, :text => 4)
+    col.resizable = true
     @view.append_column(col)
 
     for i in 1..5
@@ -174,6 +174,8 @@ class UserInteract
     end
     col = Gtk::TreeViewColumn.new(i.to_s,renderer, :active => i+4)
     col.expand=false
+    col.sizing=Gtk::TreeViewColumn::FIXED
+    col.fixed_width=20
     return col
   end
 end
