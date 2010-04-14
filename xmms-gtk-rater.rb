@@ -110,8 +110,8 @@ end
 
 class UserInteract
 
-  def initialize()
-    @xc = XmmsInteract.new()
+  def initialize(xc)
+    @xc = xc
     @window = Gtk::Window.new()
 
     view = initialize_tree()
@@ -186,6 +186,6 @@ class UserInteract
   end
 end
 
-user = UserInteract.new()
+user = UserInteract.new(XmmsInteract.new())
 
 Gtk.main
