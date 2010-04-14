@@ -23,15 +23,6 @@ class XmmsInteract
 
     @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
 
-    @xc.playback_current_id.notifier do |id|
-      add_song(id)
-      false
-    end
-
-    @xc.broadcast_playback_current_id.notifier do |id|
-      add_song(id)
-      true
-    end
   end
 
   def add_song(id)
@@ -94,6 +85,23 @@ class XmmsInteract
     else
       rate_with_id(iter[0],rate)
       update_rating(iter,rate)
+    end
+  end
+
+end
+
+class XmmsInteractPlayed < XmmsInteract
+  def initialize(xc)
+    super(xc)
+
+    @xc.playback_current_id.notifier do |id|
+      add_song(id)
+      false
+    end
+
+    @xc.broadcast_playback_current_id.notifier do |id|
+      add_song(id)
+      true
     end
   end
 
@@ -188,6 +196,6 @@ end
 
 xc.add_to_glib_mainloop
 
-user = UserInteract.new(XmmsInteract.new(xc))
+user = UserInteract.new(XmmsInteractPlayed.new(xc))
 
 Gtk.main
