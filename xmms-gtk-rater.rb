@@ -11,6 +11,7 @@ end
 
 class XmmsInteract
   attr_reader :list
+  attr_reader :xc
 
   def get(info, attr, default=nil)
     info[attr].map[0][1]
