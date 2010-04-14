@@ -4,13 +4,12 @@ require 'xmmsclient'
 require 'xmmsclient_glib'
 require 'glib2'
 require 'gtk2'
-require 'delegate'
 
 def debug(*arg)
   puts(*arg)
 end
 
-class XmmsInteract < DelegateClass(Xmms::Client)
+class XmmsInteract
   attr_reader :list
 
   def get(info, attr, default=nil)
@@ -27,7 +26,7 @@ class XmmsInteract < DelegateClass(Xmms::Client)
       puts 'Please make sure xmms2d is running and using the correct IPC path.'
       exit
     end
-    super(@xc)
+
     @xc.add_to_glib_mainloop
     # TODO: handler for future deconection
 
