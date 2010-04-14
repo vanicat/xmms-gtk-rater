@@ -18,17 +18,8 @@ class XmmsInteract
     default
   end
 
-  def initialize()
-    begin
-      @xc = Xmms::Client.new('Rater').connect(ENV['XMMS_PATH'])
-    rescue Xmms::Client::ClientError
-      puts 'Failed to connect to XMMS2 daemon.'
-      puts 'Please make sure xmms2d is running and using the correct IPC path.'
-      exit
-    end
-
-    @xc.add_to_glib_mainloop
-    # TODO: handler for future deconection
+  def initialize(xc)
+    @xc = xc
 
     @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
 
@@ -186,6 +177,17 @@ class UserInteract
   end
 end
 
-user = UserInteract.new(XmmsInteract.new())
+
+begin
+  xc = Xmms::Client.new('Rater').connect(ENV['XMMS_PATH'])
+rescue Xmms::Client::ClientError
+  puts 'Failed to connect to XMMS2 daemon.'
+  puts 'Please make sure xmms2d is running and using the correct IPC path.'
+  exit
+end
+
+xc.add_to_glib_mainloop
+
+user = UserInteract.new(XmmsInteract.new(xc))
 
 Gtk.main
