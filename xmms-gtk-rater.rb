@@ -134,36 +134,36 @@ class UserInteract
   end
 
   def initialize_tree
-    @view = Gtk::TreeView.new(@xc.list)
+    view = Gtk::TreeView.new(@xc.list)
     scroll = Gtk::ScrolledWindow.new()
-    scroll.add(@view)
+    scroll.add(view)
     scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
 
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("id",renderer, :text => 0)
-    @view.append_column(col)
+    view.append_column(col)
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("Title",renderer, :text => 1)
     col.expand = true
     col.resizable = true
-    @view.append_column(col)
+    view.append_column(col)
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("Artist",renderer, :text => 2)
     col.expand = true
     col.resizable = true
-    @view.append_column(col)
+    view.append_column(col)
     renderer = Gtk::CellRendererText.new
     col = Gtk::TreeViewColumn.new("Album",renderer, :text => 3)
     col.expand = true
     col.resizable = true
-    @view.append_column(col)
+    view.append_column(col)
 
     for i in 1..5
       col=initialize_rater_toggle(i)
-      @view.append_column(col)
+      view.append_column(col)
     end
 
-    @view.search_column=1
+    view.search_column=1
 
     return scroll
   end
