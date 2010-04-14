@@ -133,7 +133,7 @@ end
 
 class UserInteract
 
-  def initialize(xc)
+  def initialize(xc, main=false)
     @xc = xc
     @window = Gtk::Window.new()
 
@@ -149,8 +149,10 @@ class UserInteract
       false
     end
 
-    @window.signal_connect('destroy') do
-      Gtk.main_quit
+    if main
+      @window.signal_connect('destroy') do
+        Gtk.main_quit
+      end
     end
 
     @window.show_all
@@ -221,6 +223,6 @@ end
 
 xc.add_to_glib_mainloop
 
-user = UserInteract.new(XmmsInteractPlayed.new(xc))
+user = UserInteract.new(XmmsInteractPlayed.new(xc),true)
 
 Gtk.main
