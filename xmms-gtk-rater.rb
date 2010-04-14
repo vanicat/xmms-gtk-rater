@@ -161,27 +161,28 @@ class UserInteract
     col.resizable = true
     view.append_column(col)
 
+    col = Gtk::TreeViewColumn.new("rating")
     for i in 1..5
-      col=initialize_rater_toggle(i)
-      view.append_column(col)
+      initialize_rater_toggle(col,i)
     end
+    col.expand=false
+    col.sizing=Gtk::TreeViewColumn::FIXED
+    col.fixed_width=20*5
+    view.append_column(col)
 
     view.search_column=1
 
     return table
   end
 
-  def initialize_rater_toggle(i)
+  def initialize_rater_toggle(col,i)
     renderer = Gtk::CellRendererToggle.new
     renderer.activatable = true
     renderer.signal_connect('toggled') do |w,path|
       @xc.rate(path,i)
     end
-    col = Gtk::TreeViewColumn.new(i.to_s,renderer, :active => i+4)
-    col.expand=false
-    col.sizing=Gtk::TreeViewColumn::FIXED
-    col.fixed_width=20
-    return col
+    col.pack_start(renderer,false)
+    col.add_attribute(renderer, :active, i+4)
   end
 end
 
