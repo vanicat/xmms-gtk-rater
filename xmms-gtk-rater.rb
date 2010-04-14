@@ -170,6 +170,57 @@ class UserInteract
     @view.append_column(col)
   end
 
+  def current_iter
+    return @xc.list.get_iter(@current_path) if @current_path
+    selection = @view.selection
+    if selection.selected
+      return selection.selected
+    else
+      return @xc.list.iter_first
+    end
+  end
+
+  def rating_menu(i)
+    item = Gtk::MenuItem.new("Rate to _#{i}")
+    item.signal_connect("activate") {
+      @xc.rate(current_iter,i)
+    }
+    return item
+  end
+
+  def action_menu
+    unless @action_menu
+      menu = Gtk::Menu.new
+      item = Gtk::MenuItem.new("Show same _artist")
+      item.signal_connect("activate") {
+        user_same(@xc.xc, "artist", current_iter[2])
+      }
+      menu.append(item)
+
+      item = Gtk::MenuItem.new("Show same al_bum")
+      item.signal_connect("activate") {
+        user_same(@xc.xc, "album", current_iter[3])
+      }
+      menu.append(item)
+
+      item = Gtk::MenuItem.new("Show same _title")
+      item.signal_connect("activate") {
+        user_same(@xc.xc, "title", current_iter[1])
+      }
+      menu.append(item)
+
+      for i in 1..5
+        item=rating_menu(i)
+        menu.append(item)
+      end
+
+
+      menu.show_all
+      @action_menu = menu
+    end
+    return @action_menu
+  end
+
   def initialize_tree
     @view = Gtk::TreeView.new(@xc.list)
     scroll = Gtk::ScrolledWindow.new()
@@ -195,6 +246,19 @@ class UserInteract
     @view.append_column(col)
 
     @view.search_column=1
+
+    @view.signal_connect("button_press_event") do |widget, event|
+      if event.kind_of? Gdk::EventButton and event.button == 3
+        @current_path = @view.get_path(event.x, event.y)
+        @current_path = @view.get_path(event.x, event.y)[0] if @current_path
+        action_menu.popup(nil, nil, event.button, event.time)
+      end
+    end
+
+    @view.signal_connect("popup_menu") {
+      @current_path = nil
+      action_menu.popup(nil, nil, 0, Gdk::Event::CURRENT_TIME)
+    }
 
     return scroll
   end
