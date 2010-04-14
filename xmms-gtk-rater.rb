@@ -145,10 +145,38 @@ class UserInteract
     view = initialize_tree()
 
     pack = Gtk::VBox.new()
+    menubar = Gtk::MenuBar.new
+
+    file = Gtk::MenuItem.new("File")
+    file.submenu=Gtk::Menu.new
+
+    action = Gtk::MenuItem.new("Action")
+    action.submenu = action_menu
+
+    if not main
+      close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE)
+      close.signal_connect('activate') do
+        @window.destroy
+        false
+      end
+      file.submenu.append(close)
+    end
+
+    quit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT)
+
+    quit.signal_connect('activate') do
+      Gtk.main_quit
+      false
+    end
+
+    file.submenu.append(quit)
+
+    menubar.append(file)
+    menubar.append(action)
 
     @window.add(pack)
+    pack.pack_start(menubar,false,false,1)
     pack.pack_start(view,true,true,1)
-
 
     @window.signal_connect('delete_event') do
       false
