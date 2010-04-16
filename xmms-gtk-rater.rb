@@ -118,16 +118,40 @@ class XmmsInteract
 end
 
 class XmmsInteractPlayed < XmmsInteract
+  MAX_SONG = 50
+
+  def remove_last_song()
+    cur = @list.get_iter(@last_reference.path)
+    previous = @last_reference.path
+    previous.prev!
+    @list.remove(cur)
+    @last_reference = Gtk::TreeRowReference.new(@list, previous)
+    @num_song -= 1
+    remove_last_song() if @num_song > MAX_SONG
+  end
+
+  def add_song_info(id, info)
+    super(id, info)
+    @last_reference ||= Gtk::TreeRowReference.new(@list, @list.iter_first.path)
+  end
+
+
   def initialize(xc)
     super(xc)
 
+    @num_song = 0
+    @last_reference = nil
+
     @xc.playback_current_id.notifier do |id|
       add_song(id)
+      @num_song += 1
       false
     end
 
     @xc.broadcast_playback_current_id.notifier do |id|
       add_song(id)
+      @num_song += 1
+      remove_last_song() if @num_song > MAX_SONG
       true
     end
   end
