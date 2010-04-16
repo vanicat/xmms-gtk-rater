@@ -190,14 +190,18 @@ class UserInteract
     pack = Gtk::VBox.new()
     menubar = Gtk::MenuBar.new
 
-    file = Gtk::MenuItem.new("File")
-    file.submenu=Gtk::Menu.new
+    ag = Gtk::AccelGroup.new
 
-    action = Gtk::MenuItem.new("Action")
+    file = Gtk::MenuItem.new("_File")
+    file.submenu=Gtk::Menu.new
+    file.submenu.accel_group=ag
+
+    action = Gtk::MenuItem.new("_Action")
     action.submenu = action_menu
+    action.submenu.accel_group=ag
 
     if not main
-      close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE)
+      close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE,ag)
       close.signal_connect('activate') do
         @window.destroy
         false
@@ -205,7 +209,7 @@ class UserInteract
       file.submenu.append(close)
     end
 
-    quit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT)
+    quit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT,ag)
 
     quit.signal_connect('activate') do
       Gtk.main_quit
@@ -231,6 +235,7 @@ class UserInteract
       end
     end
 
+    @window.add_accel_group(ag)
     @window.show_all
   end
 
