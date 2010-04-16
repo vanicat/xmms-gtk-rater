@@ -5,6 +5,22 @@ require 'xmmsclient_glib'
 require 'glib2'
 require 'gtk2'
 
+module Xmms
+  class Collection
+    # :call-seq:
+    #  Collection.equal(field,value,from=Collection.universe) -> collection
+    #
+    # Returns a new collection for song whose field is value in from
+    def equal(field, value)
+      coll = Xmms::Collection.new(TYPE_EQUALS)
+      coll.attributes["field"]=field
+      coll.attributes["value"]=value
+      coll.operands<< self
+      return coll
+    end
+  end
+end
+
 def debug(*arg)
   puts(*arg)
 end
@@ -133,10 +149,7 @@ class XmmsInteractCollection < XmmsInteract
 end
 
 def xmms_same(xc, field, value)
-  coll = Xmms::Collection.new(Xmms::Collection::TYPE_EQUALS)
-  coll.attributes["field"]=field
-  coll.attributes["value"]=value
-  coll.operands<< Xmms::Collection.universe
+  coll = Xmms::Collection.universe.equal(field, value)
 
   return XmmsInteractCollection.new(xc, coll)
 end
