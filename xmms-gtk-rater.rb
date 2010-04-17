@@ -128,9 +128,6 @@ class XmmsInteract
     else
       iter=@list.get_iter(path)
     end
-    if iter[COL_RATING] == rate
-      rate = rate - 1
-    end
     if rate == 0
       erase_rating(iter)
     else
@@ -375,7 +372,12 @@ class UserInteract
     renderer = Gtk::CellRendererToggle.new
     renderer.activatable = true
     renderer.signal_connect('toggled') do |w,path|
-      @xc.rate(path,i)
+      iter = @xc.list.get_iter(path)
+      if iter[XmmsInteract::COL_RATING] == i
+        @xc.rate(iter, i-1)
+      else
+        @xc.rate(path,i)
+      end
     end
     col.pack_start(renderer,false)
     col.add_attribute(renderer, :active, i+XmmsInteract::COL_RATING)
