@@ -370,6 +370,20 @@ class UserInteract
       action_menu.popup(nil, nil, 0, Gdk::Event::CURRENT_TIME)
     }
 
+    @xc.list.signal_connect('row-inserted') do |model, path, iter|
+      pos = scroll.vscrollbar.adjustment.value
+      if pos == 0
+        handler = scroll.vscrollbar.adjustment.signal_connect('changed') do
+          scroll.vscrollbar.adjustment.signal_handler_disconnect(handler)
+          GLib::Idle.add do
+            scroll.vscrollbar.adjustment.value = 0
+            false
+          end
+        end
+      end
+      true
+    end
+
     return scroll
   end
 
