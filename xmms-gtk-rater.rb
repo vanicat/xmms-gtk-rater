@@ -197,6 +197,12 @@ class XmmsInteractCollection < XmmsInteract
 
     return XmmsInteractCollection.new(xc, coll)
   end
+
+  def self.parse(xc, pattern)
+    coll = Xmms::Collection.parse(pattern)
+
+    return XmmsInteractCollection.new(xc, coll)
+  end
 end
 
 class UserInteract
@@ -314,6 +320,13 @@ class UserInteract
       }
       menu.append(item)
 
+      item = Gtk::MenuItem.new("Rate _others")
+      item.signal_connect("activate") {
+        user_parse(@xc.xc)
+      }
+      menu.append(item)
+
+
       item = Gtk::MenuItem.new("_Erase rating")
       item.signal_connect("activate") {
         @xc.erase_rating(current_iter)
@@ -424,6 +437,39 @@ end
 def user_same(xc,field,value)
   UserInteract.new(XmmsInteractCollection.equal(xc,field,value),
                    "#{field}: #{value}")
+end
+
+def user_parse(xc)
+  dialog=Gtk::Dialog.new("Rate from search",
+                         nil,
+                         Gtk::Dialog::DESTROY_WITH_PARENT,
+                         [Gtk::Stock::OK, Gtk::Dialog::RESPONSE_ACCEPT],
+                         [Gtk::Stock::CANCEL, Gtk::Dialog::RESPONSE_REJECT])
+  dialog.vbox.add(Gtk::Label.new("collection pattern:"))
+  entry=Gtk::Entry.new()
+  dialog.vbox.add(entry)
+
+  entry.signal_connect('activate') do |v|
+    dialog.response(Gtk::Dialog::RESPONSE_ACCEPT)
+  end
+
+  dialog.show_all
+  dialog.run do |response|
+    if response == Gtk::Dialog::RESPONSE_ACCEPT
+      begin
+        UserInteract.new(XmmsInteractCollection.parse(xc,entry.text),entry.text)
+      rescue Exception => e
+        message = Gtk::MessageDialog.new(nil,
+                                        Gtk::Dialog::DESTROY_WITH_PARENT,
+                                        Gtk::MessageDialog::WARNING,
+                                        Gtk::MessageDialog::BUTTONS_CLOSE,
+                                        "Invalid pattern '%s'" % entry.text)
+        message.run
+        message.destroy
+      end
+    end
+    dialog.destroy
+  end
 end
 
 begin
