@@ -281,20 +281,33 @@ class UserInteract
     @view.append_column(col)
   end
 
-  def current_iter
-    return @xc.list.get_iter(@current_path) if @current_path
+  def current_iters
     selection = @view.selection
-    if selection.selected
-      return selection.selected
+    if selection.selected_rows.length > 0
+      return selection.selected_rows
+    elsif @current_path
+      return [@xc.list.get_iter(@current_path)]
     else
-      return @xc.list.iter_first
+      return [@xc.list.iter_first]
     end
+  end
+
+  def current_iter
+    path = current_iters[0]     # Using alway the first ???
+    if path.is_a? Gtk::TreeIter
+      iter=path
+    else
+      iter=@xc.list.get_iter(path)
+    end
+    return iter
   end
 
   def rating_menu(i)
     item = Gtk::MenuItem.new("Rate to _#{i}")
     item.signal_connect("activate") {
-      @xc.rate(current_iter,i)
+      current_iters.each do |iter|
+        @xc.rate(iter,i)
+      end
     }
     return item
   end
@@ -329,7 +342,9 @@ class UserInteract
 
       item = Gtk::MenuItem.new("_Erase rating")
       item.signal_connect("activate") {
-        @xc.erase_rating(current_iter)
+        current_iters.each do |iter|
+          @xc.erase_rating(iter)
+        end
       }
       menu.append(item)
 
@@ -346,6 +361,8 @@ class UserInteract
 
   def initialize_tree
     @view = Gtk::TreeView.new(@xc.list)
+    @view.selection.mode=Gtk::SELECTION_MULTIPLE
+
     scroll = Gtk::ScrolledWindow.new()
     scroll.add(@view)
     scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
