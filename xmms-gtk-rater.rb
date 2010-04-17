@@ -103,7 +103,12 @@ class XmmsInteract
     end
   end
 
-  def erase_rating(iter)
+  def erase_rating(path)
+    if path.is_a? Gtk::TreeIter
+      iter=path
+    else
+      iter=@list.get_iter(path)
+    end
     if iter
       erase_rating_with_id(iter[0])
       update_rating(iter,0)
