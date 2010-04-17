@@ -46,6 +46,21 @@ class XmmsInteract
 
     @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
 
+    @xc.broadcast_medialib_entry_changed.notifier do |id|
+      @xc.medialib_get_info(id).notifier do |info|
+        @list.each do |model,path,iter|
+          if iter[0] == id
+            iter[COL_ID]=id
+            iter[COL_TITLE]=get(info, :title, "UNKNOW")
+            iter[COL_ARTIST]=get(info, :artist, "UNKNOW")
+            iter[COL_ALBUM]=get(info, :album, "UNKNOW")
+            update_rating(iter,get(info, :rating, "UNKNOW").to_i)
+          end
+        end
+        true
+      end
+      true
+    end
   end
 
   def add_song(id)
