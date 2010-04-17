@@ -194,12 +194,12 @@ class XmmsInteractCollection < XmmsInteract
       true
     end
   end
-end
 
-def xmms_same(xc, field, value)
-  coll = Xmms::Collection.universe.equal(field, value)
+  def self.equal(xc, field, value)
+    coll = Xmms::Collection.universe.equal(field, value)
 
-  return XmmsInteractCollection.new(xc, coll)
+    return XmmsInteractCollection.new(xc, coll)
+  end
 end
 
 class UserInteract
@@ -401,7 +401,8 @@ end
 
 
 def user_same(xc,field,value)
-  UserInteract.new(xmms_same(xc,field,value),"#{field}: #{value}")
+  UserInteract.new(XmmsInteractCollection.equal(xc,field,value),
+                   "#{field}: #{value}")
 end
 
 begin
