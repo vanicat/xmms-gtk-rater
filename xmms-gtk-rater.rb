@@ -190,8 +190,10 @@ class XmmsInteractCollection < XmmsInteract
     super(xc)
 
     @xc.coll_query_ids(coll).notifier do |res|
-      res.each do |id|
-        add_song(id)
+      if res
+        res.each do |id|
+          add_song(id)
+        end
       end
       true
     end
