@@ -41,25 +41,34 @@ class XmmsInteract
     default
   end
 
+  def destroy!
+    @runing = false
+    @list = nil
+  end
+
   def initialize(xc)
     @xc = xc
 
     @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
 
+    @runing = true
+
     @xc.broadcast_medialib_entry_changed.notifier do |id|
-      @xc.medialib_get_info(id).notifier do |info|
-        @list.each do |model,path,iter|
-          if iter[0] == id
-            iter[COL_ID]=id
-            iter[COL_TITLE]=get(info, :title, "UNKNOW")
-            iter[COL_ARTIST]=get(info, :artist, "UNKNOW")
-            iter[COL_ALBUM]=get(info, :album, "UNKNOW")
-            update_rating(iter,get(info, :rating, "UNKNOW").to_i)
+      if @runing
+        @xc.medialib_get_info(id).notifier do |info|
+          @list.each do |model,path,iter|
+            if iter[0] == id
+              iter[COL_ID]=id
+              iter[COL_TITLE]=get(info, :title, "UNKNOW")
+              iter[COL_ARTIST]=get(info, :artist, "UNKNOW")
+              iter[COL_ALBUM]=get(info, :album, "UNKNOW")
+              update_rating(iter,get(info, :rating, "UNKNOW").to_i)
+            end
           end
+          true
         end
-        true
       end
-      true
+      @runing
     end
   end
 
@@ -241,6 +250,11 @@ class UserInteract
     pack.pack_start(view,true,true,1)
 
     @window.signal_connect('delete_event') do
+      false
+    end
+
+    @window.signal_connect('destroy') do
+      @xc.destroy!
       false
     end
 
