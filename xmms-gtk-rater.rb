@@ -248,6 +248,8 @@ class UserInteract
       @window.signal_connect('destroy') do
         Gtk.main_quit
       end
+
+      watch_lost_conexion
     end
 
     @window.add_accel_group(ag)
@@ -363,6 +365,23 @@ class UserInteract
     end
     col.pack_start(renderer,false)
     col.add_attribute(renderer, :active, i+XmmsInteract::COL_RATING)
+  end
+
+  # TODO: reconnect would be better than quiting
+  def watch_lost_conexion
+    @xc.xc.on_disconnect do
+      dialog = Gtk::Dialog.new("Connection lost",
+                               @window,
+                               Gtk::Dialog::DESTROY_WITH_PARENT,
+                               [ Gtk::Stock::OK, Gtk::Dialog::RESPONSE_NONE ])
+
+      # Ensure that the dialog box is destroyed when the user responds.
+      dialog.signal_connect('response') { Gtk.main_quit }
+
+      # Add the message in a label, and show everything we've added to the dialog.
+      dialog.vbox.add(Gtk::Label.new("Connection to xmms lost, quiting"))
+      dialog.show_all
+    end
   end
 end
 
