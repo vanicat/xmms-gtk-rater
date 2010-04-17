@@ -314,11 +314,16 @@ class UserInteract
       }
       menu.append(item)
 
+      item = Gtk::MenuItem.new("_Erase rating")
+      item.signal_connect("activate") {
+        @xc.erase_rating(current_iter)
+      }
+      menu.append(item)
+
       for i in 1..5
         item=rating_menu(i)
         menu.append(item)
       end
-
 
       menu.show_all
       @action_menu = menu
