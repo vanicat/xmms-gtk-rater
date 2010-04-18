@@ -189,6 +189,25 @@ class XmmsInteractCollection < XmmsInteract
   def initialize(xc,coll)
     super(xc)
 
+    @list.set_sort_column_id(COL_ID)
+
+    @list.set_default_sort_func do |iter1, iter2|
+      iter1[COL_ID] <=> iter2[COL_ID]
+    end
+
+    @list.set_sort_func(COL_ALBUM) do |iter1, iter2|
+      [iter1[COL_ALBUM], iter1[COL_TITLE], iter1[COL_ID]] <=> [iter2[COL_ALBUM], iter2[COL_TITLE], iter2[COL_ID]]
+    end
+
+    @list.set_sort_func(COL_TITLE) do |iter1, iter2|
+      [iter1[COL_TITLE], iter1[COL_ARTIST], iter1[COL_ALBUM], iter1[COL_ID]] <=> [iter2[COL_TITLE], iter2[COL_ARTIST], iter2[COL_ALBUM], iter2[COL_ID]]
+    end
+
+    @list.set_sort_func(COL_ARTIST) do |iter1, iter2|
+      [iter1[COL_ARTIST], iter1[COL_ALBUM], iter1[COL_TITLE], iter1[COL_ID]] <=> [iter2[COL_ARTIST], iter2[COL_ALBUM], iter2[COL_TITLE], iter2[COL_ID]]
+    end
+
+
     @xc.coll_query_ids(coll).notifier do |res|
       if res
         res.each do |id|
@@ -214,10 +233,15 @@ end
 
 class UserInteract
 
+  def main?
+    @main
+  end
+
   def initialize(xc, title, main=false)
     @xc = xc
     @window = Gtk::Window.new()
     @window.title = title
+    @main = main
 
     view = initialize_tree()
 
@@ -234,7 +258,7 @@ class UserInteract
     action.submenu = action_menu
     action.submenu.accel_group=ag
 
-    if not main
+    if not main?
       close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE,ag)
       close.signal_connect('activate') do
         @window.destroy
@@ -268,7 +292,7 @@ class UserInteract
       false
     end
 
-    if main
+    if main?
       @window.signal_connect('destroy') do
         Gtk.main_quit
       end
@@ -288,6 +312,7 @@ class UserInteract
     col.resizable = true
     col.sizing = Gtk::TreeViewColumn::FIXED
     col.fixed_width = 120
+    col.sort_column_id = colnum unless main?
     @view.append_column(col)
   end
 
