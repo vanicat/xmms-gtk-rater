@@ -282,9 +282,12 @@ class UserInteract
 
   def initialize_std_col(title, colnum)
     renderer = Gtk::CellRendererText.new
+    renderer.ellipsize = Pango::ELLIPSIZE_END
     col = Gtk::TreeViewColumn.new(title,renderer, :text => colnum)
     col.expand = true
     col.resizable = true
+    col.sizing = Gtk::TreeViewColumn::FIXED
+    col.fixed_width = 120
     @view.append_column(col)
   end
 
