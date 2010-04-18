@@ -377,11 +377,6 @@ class UserInteract
     scroll.add(@view)
     scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
 
-    renderer = Gtk::CellRendererText.new
-    col = Gtk::TreeViewColumn.new("id",renderer, :text => XmmsInteract::COL_ID)
-    @view.append_column(col)
-    renderer = Gtk::CellRendererText.new
-
     initialize_std_col("Title", XmmsInteract::COL_TITLE)
 
     initialize_std_col("Artist", XmmsInteract::COL_ARTIST)
