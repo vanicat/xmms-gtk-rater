@@ -497,7 +497,7 @@ def user_parse(xc)
 end
 
 begin
-  xc = Xmms::Client.new('Rater').connect(ENV['XMMS_PATH'])
+  xc = Xmms::Client.new('GtkRater').connect(ENV['XMMS_PATH'])
 rescue Xmms::Client::ClientError
   puts 'Failed to connect to XMMS2 daemon.'
   puts 'Please make sure xmms2d is running and using the correct IPC path.'
