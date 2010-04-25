@@ -419,8 +419,8 @@ class UserInteract
 
     @view.signal_connect("button_press_event") do |widget, event|
       if event.kind_of? Gdk::EventButton and event.button == 3
-        @current_path = @view.get_path(event.x, event.y)
-        @current_path = @view.get_path(event.x, event.y)[0] if @current_path
+        path = @view.get_path(event.x, event.y)
+        @current_path = path[0] if path
         action_menu.popup(nil, nil, event.button, event.time)
       end
     end
