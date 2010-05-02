@@ -100,34 +100,32 @@ class SongList
     @xi.add_medialib_watcher(self)
   end
 
+  def set_song_infos(iter, id, title, artist, album, rating)
+    iter[COL_ID]=id
+    iter[COL_TITLE]=title || "UNKNOW"
+    iter[COL_ARTIST]=artist || "UNKNOW"
+    iter[COL_ALBUM]=album || "UNKNOW"
+    update_rating(iter, rating)
+  end
+
   def song_changed(id, title, artist, album, rating)
     @list.each do |model,path,iter|
-      if iter[0] == id
-        iter[COL_ID]=id
-        iter[COL_TITLE]=title || "UNKNOW"
-        iter[COL_ARTIST]=artist || "UNKNOW"
-        iter[COL_ALBUM]=album || "UNKNOW"
-        update_rating(iter, rating)
-      end
+      set_song_infos(iter, id, title, artist, album, rating) if iter[0] == id
     end
   end
 
   def add_song(id)
     if id != 0
-      @xi.xc.medialib_get_info(id).notifier do |res|
-        add_song_info(id,res)
+      @xi.xc.medialib_get_info(id).notifier do |info|
+        add_song_info(id, get(info, :title), get(info, :artist), get(info, :album), get(info, :rating, "0").to_i)
         false
       end
     end
   end
 
-  def add_song_info(id, info)
+  def add_song_info(id, title, artist, album, rating)
     iter = @list.prepend
-    iter[COL_ID]=id
-    iter[COL_TITLE]=get(info, :title, "UNKNOW")
-    iter[COL_ARTIST]=get(info, :artist, "UNKNOW")
-    iter[COL_ALBUM]=get(info, :album, "UNKNOW")
-    update_rating(iter,get(info, :rating, "UNKNOW").to_i)
+    set_song_infos(iter, id, title, artist, album, rating)
   end
 
   def update_rating(iter,rate)
@@ -196,8 +194,8 @@ class SongListPlayed < SongList
     remove_last_song() if @num_song > MAX_SONG
   end
 
-  def add_song_info(id, info)
-    super(id, info)
+  def add_song_info(id, title, artist, album, rating)
+    super(id, title, artist, album, rating)
     @last_reference ||= Gtk::TreeRowReference.new(@list, @list.iter_first.path)
   end
 
