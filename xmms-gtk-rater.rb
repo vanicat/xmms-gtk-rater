@@ -188,7 +188,7 @@ class XmmsInteract
   end
 
   def unregister_view(view)
-    @view.delete(view)
+    @views.delete(view)
   end
 end
 
