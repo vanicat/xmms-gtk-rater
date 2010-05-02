@@ -36,18 +36,25 @@ class XmmsInteract
   end
 
   def initialize
-    begin
-      @xc = Xmms::Client.new('GtkRater').connect(ENV['XMMS_PATH'])
-    rescue Xmms::Client::ClientError
+    @looking_for_medialib_list = []
+    @current_song_watcher = []
+    unless connect!
       puts 'Failed to connect to XMMS2 daemon.'
       puts 'Please make sure xmms2d is running and using the correct IPC path.'
       exit
     end
 
-    @xc.add_to_glib_mainloop
 
-    @looking_for_medialib_list = []
-    @current_song_watcher = []
+  end
+
+  def connect!
+    begin
+      @xc = Xmms::Client.new('GtkRater').connect(ENV['XMMS_PATH'])
+    rescue Xmms::Client::ClientError
+      return false
+    end
+
+    @xc.add_to_glib_mainloop
 
     @xc.broadcast_medialib_entry_changed.notifier do |id|
       song_info(id) do |id, title, artist, album, rating|
@@ -68,6 +75,15 @@ class XmmsInteract
       end
       true
     end
+
+    @xc.on_disconnect do
+      GLib::Timeout.add_seconds(10) do
+        res = connect!
+        not res
+      end
+    end
+
+    return true
   end
 
   def add_medialib_watcher(watcher)
@@ -354,8 +370,6 @@ class UserInteract
       @window.signal_connect('destroy') do
         Gtk.main_quit
       end
-
-      watch_lost_conexion
     end
 
     @window.add_accel_group(ag)
@@ -518,23 +532,6 @@ class UserInteract
     end
     col.pack_start(renderer,false)
     col.add_attribute(renderer, :active, i+SongList::COL_RATING)
-  end
-
-  # TODO: reconnect would be better than quiting
-  def watch_lost_conexion
-    @slist.xi.xc.on_disconnect do
-      dialog = Gtk::Dialog.new("Connection lost",
-                               @window,
-                               Gtk::Dialog::DESTROY_WITH_PARENT,
-                               [ Gtk::Stock::OK, Gtk::Dialog::RESPONSE_NONE ])
-
-      # Ensure that the dialog box is destroyed when the user responds.
-      dialog.signal_connect('response') { Gtk.main_quit }
-
-      # Add the message in a label, and show everything we've added to the dialog.
-      dialog.vbox.add(Gtk::Label.new("Connection to xmms lost, quiting"))
-      dialog.show_all
-    end
   end
 end
 
