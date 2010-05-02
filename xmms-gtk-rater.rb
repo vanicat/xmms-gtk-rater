@@ -78,6 +78,12 @@ class XmmsInteract
     @looking_for_medialib_list.delete(watcher)
   end
 
+  def current_id(&body)
+    @xc.playback_current_id.notifier do |id|
+      yield(id)
+    end
+  end
+
   def song_info(id, &body)
     if id != 0
       @xc.medialib_get_info(id).notifier do |info|
@@ -88,7 +94,7 @@ class XmmsInteract
   end
 
   def add_current_song_watcher(watcher)
-    @xc.playback_current_id.notifier do |id|
+    current_id do |id|
       song_info(id) do |id, title, artist, album, rating|
         watcher.current_song_info(id, title, artist, album, rating)
       end
@@ -197,7 +203,7 @@ class SongList
       @xi.rate(iter[COL_ID],rate)
       update_rating(iter, rate)
     else
-      @xi.xc.playback_current_id.notifier do |id|
+      @xi.current_id do |id|
         @xi.rate(id, rate)
         false
       end
