@@ -45,6 +45,26 @@ class XmmsInteract
     end
 
     @xc.add_to_glib_mainloop
+
+    @looking_for_medialib_list = []
+
+    @xc.broadcast_medialib_entry_changed.notifier do |id|
+      @xc.medialib_get_info(id).notifier do |info|
+        @looking_for_medialib_list.each do |list|
+          list.song_changed(id, get(info, :title), get(info, :artist), get(info, :album), get(info, :rating, "0").to_i)
+        end
+        true
+      end
+      true
+    end
+  end
+
+  def add_medialib_watcher(watcher)
+    @looking_for_medialib_list << watcher
+  end
+
+  def remove_medialib_watcher(watcher)
+    @looking_for_medialib_list.delete(watcher)
   end
 end
 
@@ -67,6 +87,7 @@ class SongList
   def destroy!
     @runing = false
     @list = nil
+    @xi.remove_medialib_watcher(self)
   end
 
   def initialize(xi)
@@ -76,22 +97,18 @@ class SongList
 
     @runing = true
 
-    @xi.xc.broadcast_medialib_entry_changed.notifier do |id|
-      if @runing
-        @xi.xc.medialib_get_info(id).notifier do |info|
-          @list.each do |model,path,iter|
-            if iter[0] == id
-              iter[COL_ID]=id
-              iter[COL_TITLE]=get(info, :title, "UNKNOW")
-              iter[COL_ARTIST]=get(info, :artist, "UNKNOW")
-              iter[COL_ALBUM]=get(info, :album, "UNKNOW")
-              update_rating(iter,get(info, :rating, "UNKNOW").to_i)
-            end
-          end
-          true
-        end
+    @xi.add_medialib_watcher(self)
+  end
+
+  def song_changed(id, title, artist, album, rating)
+    @list.each do |model,path,iter|
+      if iter[0] == id
+        iter[COL_ID]=id
+        iter[COL_TITLE]=title || "UNKNOW"
+        iter[COL_ARTIST]=artist || "UNKNOW"
+        iter[COL_ALBUM]=album || "UNKNOW"
+        update_rating(iter, rating)
       end
-      @runing
     end
   end
 
