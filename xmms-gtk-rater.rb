@@ -28,6 +28,13 @@ end
 
 class XmmsInteract
   attr_reader :xc
+
+  def get(info, attr, default=nil)
+    info[attr].map[0][1]
+  rescue NoMethodError => e
+    default
+  end
+
   def initialize
     begin
       @xc = Xmms::Client.new('GtkRater').connect(ENV['XMMS_PATH'])
