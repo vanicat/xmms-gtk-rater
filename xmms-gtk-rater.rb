@@ -160,12 +160,6 @@ class SongList
     end
   end
 
-  def add_song(id)
-    @xi.song_info(id) do |id, title, artist, album, rating|
-      add_song_info(id, title, artist, album, rating)
-    end
-  end
-
   def add_song_info(id, title, artist, album, rating)
     iter = @list.prepend
     set_song_infos(iter, id, title, artist, album, rating)
