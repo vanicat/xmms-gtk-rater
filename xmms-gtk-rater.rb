@@ -112,6 +112,17 @@ class XmmsInteract
     end
   end
 
+  def erase_rating(id)
+    @xc.medialib_entry_property_remove(id, :rating, "client/generic").notifier do
+      false
+    end
+  end
+
+  def rate(id,rate)
+    @xc.medialib_entry_property_set(id, :rating, rate, "client/generic").notifier do
+      false
+    end
+  end
 end
 
 class SongList
@@ -172,12 +183,6 @@ class SongList
     end
   end
 
-  def erase_rating_with_id(id)
-    @xi.xc.medialib_entry_property_remove(id, :rating, "client/generic").notifier do
-       false
-    end
-  end
-
   def erase_rating(path)
     if path.is_a? Gtk::TreeIter
       iter=path
@@ -185,20 +190,14 @@ class SongList
       iter=@list.get_iter(path)
     end
     if iter
-      erase_rating_with_id(iter[0])
+      @xi.erase_rating(iter[0])
       update_rating(iter,0)
-   else
+    else
       @xi.xc.playback_current_id.notifier do |id|
-        erase_rating_with_id(id)
+        @xi.erase_rating(id)
         false
       end
       update_rating(@list.iter_first,0)
-    end
-  end
-
-  def rate_with_id(id,rate)
-    @xi.xc.medialib_entry_property_set(id, :rating, rate, "client/generic").notifier do
-      false
     end
   end
 
@@ -211,7 +210,7 @@ class SongList
     if rate == 0
       erase_rating(iter)
     else
-      rate_with_id(iter[COL_ID],rate)
+      @xi.rate(iter[COL_ID],rate)
       update_rating(iter,rate)
     end
   end
