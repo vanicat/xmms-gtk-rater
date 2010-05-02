@@ -1,0 +1,100 @@
+#+Title: the Xmms Gtk Rater Client
+
+* Apropos
+This is a small gtk client for xmms2 that will allow you to easily rate your song as you are playing them
+
+** Copying
+   This license apply to all file in this package:
+
+   Permission is hereby granted, free of charge, to any person obtaining a
+   copy of this software and associated documentation files (the "Software"),
+   to deal in the Software without restriction, including without limitation
+   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+   and/or sell copies of the Software, and to permit persons to whom the
+   Software is furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+   SOFTWARE IN THE PUBLIC INTEREST, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR
+   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+   DEALINGS IN THE SOFTWARE.
+
+   Except as contained in this notice, the name of Rémi Vanicat shall not be
+   used in advertising or otherwise to promote the sale, use or other dealings
+   in this Software without prior written authorization from Rémi Vanicat.
+
+* Dependency
+  You need
+  - ruby
+  - the gtk2 ruby library
+  - xmms2
+  - the ruby libxmmsclient, with its glib extension
+
+* Installing
+  Just put the executable somewhere in your path with the executable bit set
+
+  You can remove the .rb
+
+  It might work on windows. If you successfully install it there please, let me
+  know
+
+* Running
+  When the application is launched, its main windows will open. There new song
+  will be add as they are played.
+** Rating
+   You can rate songs shown in the different windows of the application with:
+   - the "Action" Menu,
+   - the context Menu (use right click, or the menu key),
+   - or just click on the check box.
+
+   Note that xmms2 do not accept 0 as a rating, an a such, 0 mean no rating.
+
+** Browsing the medialib
+   You can also use the application to rate other song: in both the action
+   menu and context menu, you have the
+   - "Show same artist"
+   - "Show same album"
+   - "Show same title"
+   to list all songs that have the same artist, album or title than the current
+   one. Checking for same title could be useful to check for duplicate songs,
+   and rate one high, and the others low.
+
+   You can also use the "Rate others" menu entry where you will be asked for an
+   xmms2 collection pattern. A new windows will open listing songs that are
+   matched by your pattern.
+
+   In all those case, the song listed can be rated as in the main windows.
+
+** Pattern
+   A quick description of xmms2 pattern, more can be found [[http://xmms2.org/wiki/Collections_usage_with_cli][here]].
+
+*** the pattern grammar:
+    - in: name :: will match any song that is in the collection named /name/
+    - property: shellpattern :: will match any song whose /property/ is
+	 matched by the /shellpattern/
+
+	 You can use * in shellpattern to match anything, and ? to match just
+	 one character.
+
+	 You can also use '>', '<' '<=' or '>=' in place of the ':' for matching
+	 smaller or bigger value
+    - +property :: will match any song whose /property/ is set
+    - pattern AND pattern :: will match any song that is matched by both pattern
+    - pattern OR pattern :: will match any song that is matched by at least one
+	 of the pattern.
+
+*** Interesting property could be:
+   - title: :: the title of the song,
+   - artist: :: the artist, group, singer... of the song,
+   - album: :: the album the song is,
+   - genre: :: the style of music,
+   - rating: :: the rating of the song,
+   - laststarted: :: the last time the song have been played,
+   - timesplayed: :: the number of time the song have been played,
+   - status: :: the status of the song. For example, 3 is for song that have
+	failed to be played last time.
