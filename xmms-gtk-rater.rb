@@ -47,11 +47,22 @@ class XmmsInteract
     @xc.add_to_glib_mainloop
 
     @looking_for_medialib_list = []
+    @current_song_watcher = []
 
     @xc.broadcast_medialib_entry_changed.notifier do |id|
       @xc.medialib_get_info(id).notifier do |info|
         @looking_for_medialib_list.each do |list|
           list.song_changed(id, get(info, :title), get(info, :artist), get(info, :album), get(info, :rating, "0").to_i)
+        end
+        true
+      end
+      true
+    end
+
+    @xc.broadcast_playback_current_id.notifier do |id|
+      song_info(id) do |id, title, artist, album, rating|
+        @current_song_watcher.each do |watcher|
+          watcher.current_song_info(id, title, artist, album, rating)
         end
         true
       end
@@ -75,6 +86,32 @@ class XmmsInteract
       end
     end
   end
+
+  def add_current_song_watcher(watcher)
+    @xc.playback_current_id.notifier do |id|
+      song_info(id) do |id, title, artist, album, rating|
+        watcher.current_song_info(id, title, artist, album, rating)
+      end
+      false
+    end
+    @current_song_watcher << watcher
+  end
+
+  def remove_current_song_watcher(watcher)
+    @current_song_watcher.delete(watcher)
+  end
+
+  def coll_each_song(coll, &body)
+    @xc.coll_query_ids(coll).notifier do |res|
+      if res
+        res.each do |id|
+          song_info(id, &body)
+        end
+      end
+      true
+    end
+  end
+
 end
 
 class SongList
@@ -202,9 +239,15 @@ class SongListPlayed < SongList
 
   def add_song_info(id, title, artist, album, rating)
     super(id, title, artist, album, rating)
+    @num_song += 1
     @last_reference ||= Gtk::TreeRowReference.new(@list, @list.iter_first.path)
   end
 
+
+  def current_song_info(id, title, artist, album, rating)
+    add_song_info(id, title, artist, album, rating)
+    remove_last_song() if @num_song > MAX_SONG
+  end
 
   def initialize(xc)
     super(xc)
@@ -212,18 +255,7 @@ class SongListPlayed < SongList
     @num_song = 0
     @last_reference = nil
 
-    @xi.xc.playback_current_id.notifier do |id|
-      add_song(id)
-      @num_song += 1
-      false
-    end
-
-    @xi.xc.broadcast_playback_current_id.notifier do |id|
-      add_song(id)
-      @num_song += 1
-      remove_last_song() if @num_song > MAX_SONG
-      true
-    end
+    @xi.add_current_song_watcher(self)
   end
 
 end
@@ -252,13 +284,8 @@ class SongListCollection < SongList
     end
 
 
-    @xi.xc.coll_query_ids(coll).notifier do |res|
-      if res
-        res.each do |id|
-          add_song(id)
-        end
-      end
-      true
+    @xi.coll_each_song(coll) do |id, title, artist, album, rating|
+      add_song_info(id, title, artist, album, rating)
     end
   end
 
