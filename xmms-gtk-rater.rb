@@ -36,6 +36,7 @@ class XmmsInteract
   def initialize
     @looking_for_medialib_list = []
     @current_song_watcher = []
+    @views = []
     unless connect!
       puts 'Failed to connect to XMMS2 daemon.'
       puts 'Please make sure xmms2d is running and using the correct IPC path.'
@@ -75,9 +76,20 @@ class XmmsInteract
     end
 
     @xc.on_disconnect do
+      @views.each do |view|
+        view.on_server_disconnect!
+      end
+
       GLib::Timeout.add_seconds(10) do
         res = connect!
-        not res
+        if res
+          @views.each do |view|
+            view.on_server_reconnect!
+          end
+          false
+        else
+          true
+        end
       end
     end
 
@@ -147,6 +159,14 @@ class XmmsInteract
       end
     end
   end
+
+  def register_view(view)
+    @views << view
+  end
+
+  def unregister_view(view)
+    @view.delete(view)
+  end
 end
 
 class SongList
@@ -169,6 +189,14 @@ class SongList
     @runing = false
     @list = nil
     @xi.remove_medialib_watcher(self)
+  end
+
+  def register(view)
+    xi.register_view(view)
+  end
+
+  def unregister(view)
+    xi.unregister_view(view)
   end
 
   def initialize(xi)
@@ -309,11 +337,21 @@ class UserInteract
     @main
   end
 
+  def on_server_reconnect!
+    @window.sensitive=true
+  end
+
+  def on_server_disconnect!
+    @window.sensitive=false
+  end
+
   def initialize(slist, title, main=false)
     @slist = slist
     @window = Gtk::Window.new()
     @window.title = title
     @main = main
+
+    @slist.register(self)
 
     view = initialize_tree()
 
@@ -360,6 +398,7 @@ class UserInteract
     end
 
     @window.signal_connect('destroy') do
+      @slist.unregister(self)
       @slist.destroy!
       false
     end
