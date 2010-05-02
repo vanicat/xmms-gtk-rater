@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>the Xmms Gtk Rater Client</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2010-05-02 16:13:36 CEST"/>
+<meta name="author" content="Rémi Vanicat <vanicat@debian.org>"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+
+<h1 class="title">the Xmms Gtk Rater Client</h1>
+
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> What is this ? </h2>
+<div class="outline-text-2" id="text-1">
+
+<p>This is a small gtk client for xmms2 that will allow you to easily rate your song as you are playing them
+</p>
+
+</div>
+
+<div id="outline-container-1_1" class="outline-3">
+<h3 id="sec-1_1"><span class="section-number-3">1.1</span> Copying </h3>
+<div class="outline-text-3" id="text-1_1">
+
+<p>This license apply to all file in this package:
+</p>
+<p>
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+</p>
+<p>
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+</p>
+<p>
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+SOFTWARE IN THE PUBLIC INTEREST, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.
+</p>
+<p>
+Except as contained in this notice, the name of Rémi Vanicat shall not be
+used in advertising or otherwise to promote the sale, use or other dealings
+in this Software without prior written authorization from Rémi Vanicat.
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Dependency </h2>
+<div class="outline-text-2" id="text-2">
+
+<p>You need
+</p><ul>
+<li>
+ruby
+</li>
+<li>
+the gtk2 ruby library
+</li>
+<li>
+xmms2
+</li>
+<li>
+the ruby libxmmsclient, with its glib extension
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Installing </h2>
+<div class="outline-text-2" id="text-3">
+
+<p>Just put the executable somewhere in your path with the executable bit set
+</p>
+<p>
+You can remove the .rb
+</p>
+<p>
+It might work on windows. If you successfully install it there please, let me
+know
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Running </h2>
+<div class="outline-text-2" id="text-4">
+
+<p>When the application is launched, its main windows will open. There new song
+will be add as they are played.
+</p>
+</div>
+
+<div id="outline-container-4_1" class="outline-3">
+<h3 id="sec-4_1"><span class="section-number-3">4.1</span> Rating </h3>
+<div class="outline-text-3" id="text-4_1">
+
+<p>You can rate songs shown in the different windows of the application with:
+</p><ul>
+<li>
+the "Action" Menu,
+</li>
+<li>
+the context Menu (use right click, or the menu key),
+</li>
+<li>
+or just click on the check box.
+
+</li>
+</ul>
+
+<p>Note that xmms2 do not accept 0 as a rating, an a such, 0 mean no rating.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-4_2" class="outline-3">
+<h3 id="sec-4_2"><span class="section-number-3">4.2</span> Browsing the medialib </h3>
+<div class="outline-text-3" id="text-4_2">
+
+<p>You can also use the application to rate other song: in both the action menu and context menu, you have the
+</p><ul>
+<li>
+"Show same artist"
+</li>
+<li>
+"Show same album"
+</li>
+<li>
+"Show same title"
+</li>
+</ul>
+
+<p>to list all songs that have the same artist, album or title than the current one. Checking for same title could be useful to check for duplicate songs, and rate one high, and the others low.
+</p>
+<p>
+You can also use the "Rate others" menu entry where you will be asked for an xmms2 collection pattern. A new windows will open listing songs that are matched by your pattern.
+</p>
+<p>
+In all those case, the song listed can be rated as in the main windows.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-4_3" class="outline-3">
+<h3 id="sec-4_3"><span class="section-number-3">4.3</span> Pattern </h3>
+<div class="outline-text-3" id="text-4_3">
+
+<p>A quick description of xmms2 pattern, more can be found <a href="http://xmms2.org/wiki/Collections_usage_with_cli">here</a>.
+</p>
+
+</div>
+
+<div id="outline-container-4_3_1" class="outline-4">
+<h4 id="sec-4_3_1"><span class="section-number-4">4.3.1</span> the pattern grammar: </h4>
+<div class="outline-text-4" id="text-4_3_1">
+
+<dl>
+<dt>in: name</dt><dd>
+will match any song that is in the collection named <i>name</i>
+</dd>
+<dt>property: shellpattern</dt><dd>
+will match any song whose <i>property</i> is matched by the <i>shellpattern</i>
+
+<p>
+You can use * in shellpattern to match anything, and ? to match just one character.
+</p>
+<p>
+You can also use '&gt;', '&lt;' '&lt;=' or '&gt;=' in place of the ':' for matching smaller or bigger value
+</p></dd>
+<dt>+property</dt><dd>
+will match any song whose <i>property</i> is set
+</dd>
+<dt>pattern AND pattern</dt><dd>
+will match any song that is matched by both pattern
+</dd>
+<dt>pattern OR pattern</dt><dd>
+will match any song that is matched by at least one of the pattern.
+
+</dd>
+</dl>
+</div>
+
+</div>
+
+<div id="outline-container-4_3_2" class="outline-4">
+<h4 id="sec-4_3_2"><span class="section-number-4">4.3.2</span> Interesting property could be: </h4>
+<div class="outline-text-4" id="text-4_3_2">
+
+<dl>
+<dt>title:</dt><dd>
+the title of the song,
+</dd>
+<dt>artist:</dt><dd>
+the artist, group, singer&hellip; of the song,
+</dd>
+<dt>album:</dt><dd>
+the album the song is,
+</dd>
+<dt>genre:</dt><dd>
+the style of music,
+</dd>
+<dt>rating:</dt><dd>
+the rating of the song,
+</dd>
+<dt>laststarted:</dt><dd>
+the last time the song have been played,
+</dd>
+<dt>timesplayed:</dt><dd>
+the number of time the song have been played,
+</dd>
+<dt>status:</dt><dd>
+the status of the song. For example, 3 is for song that have failed to be played last time.
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble">
+<p class="author"> Author: Rémi Vanicat <vanicat@debian.org>
+</p>
+<p class="date"> Date: 2010-05-02 16:13:36 CEST</p>
+<p class="creator">HTML generated by org-mode 6.35trans in emacs 23</p>
+</div>
+</div>
+</body>
+</html>
