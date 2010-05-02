@@ -50,9 +50,9 @@ class XmmsInteract
     @current_song_watcher = []
 
     @xc.broadcast_medialib_entry_changed.notifier do |id|
-      @xc.medialib_get_info(id).notifier do |info|
+      song_info(id) do |id, title, artist, album, rating|
         @looking_for_medialib_list.each do |list|
-          list.song_changed(id, get(info, :title), get(info, :artist), get(info, :album), get(info, :rating, "0").to_i)
+          list.song_changed(id, title, artist, album, rating)
         end
         true
       end
