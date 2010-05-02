@@ -593,10 +593,10 @@ def user_parse(xi)
         UserInteract.new(SongListCollection.parse(xi,entry.text),entry.text)
       rescue Exception => e
         message = Gtk::MessageDialog.new(nil,
-                                        Gtk::Dialog::DESTROY_WITH_PARENT,
-                                        Gtk::MessageDialog::WARNING,
-                                        Gtk::MessageDialog::BUTTONS_CLOSE,
-                                        "Invalid pattern '%s'" % entry.text)
+                                         Gtk::Dialog::DESTROY_WITH_PARENT,
+                                         Gtk::MessageDialog::WARNING,
+                                         Gtk::MessageDialog::BUTTONS_CLOSE,
+                                         "Invalid pattern '%s'" % entry.text)
         message.run
         message.destroy
       end
