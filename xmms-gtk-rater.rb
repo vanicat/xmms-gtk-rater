@@ -50,7 +50,7 @@ end
 
 class SongList
   attr_reader :list
-  attr_reader :xc
+  attr_reader :xi
 
   COL_ID = 0
   COL_TITLE = 1
@@ -69,16 +69,16 @@ class SongList
     @list = nil
   end
 
-  def initialize(xc)
-    @xc = xc
+  def initialize(xi)
+    @xi = xi
 
     @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
 
     @runing = true
 
-    @xc.broadcast_medialib_entry_changed.notifier do |id|
+    @xi.xc.broadcast_medialib_entry_changed.notifier do |id|
       if @runing
-        @xc.medialib_get_info(id).notifier do |info|
+        @xi.xc.medialib_get_info(id).notifier do |info|
           @list.each do |model,path,iter|
             if iter[0] == id
               iter[COL_ID]=id
@@ -97,7 +97,7 @@ class SongList
 
   def add_song(id)
     if id != 0
-      @xc.medialib_get_info(id).notifier do |res|
+      @xi.xc.medialib_get_info(id).notifier do |res|
         add_song_info(id,res)
         false
       end
@@ -121,7 +121,7 @@ class SongList
   end
 
   def erase_rating_with_id(id)
-    @xc.medialib_entry_property_remove(id, :rating, "client/generic").notifier do
+    @xi.xc.medialib_entry_property_remove(id, :rating, "client/generic").notifier do
        false
     end
   end
@@ -136,7 +136,7 @@ class SongList
       erase_rating_with_id(iter[0])
       update_rating(iter,0)
    else
-      @xc.playback_current_id.notifier do |id|
+      @xi.xc.playback_current_id.notifier do |id|
         erase_rating_with_id(id)
         false
       end
@@ -145,7 +145,7 @@ class SongList
   end
 
   def rate_with_id(id,rate)
-    @xc.medialib_entry_property_set(id, :rating, rate, "client/generic").notifier do
+    @xi.xc.medialib_entry_property_set(id, :rating, rate, "client/generic").notifier do
       false
     end
   end
@@ -191,13 +191,13 @@ class SongListPlayed < SongList
     @num_song = 0
     @last_reference = nil
 
-    @xc.playback_current_id.notifier do |id|
+    @xi.xc.playback_current_id.notifier do |id|
       add_song(id)
       @num_song += 1
       false
     end
 
-    @xc.broadcast_playback_current_id.notifier do |id|
+    @xi.xc.broadcast_playback_current_id.notifier do |id|
       add_song(id)
       @num_song += 1
       remove_last_song() if @num_song > MAX_SONG
@@ -231,7 +231,7 @@ class SongListCollection < SongList
     end
 
 
-    @xc.coll_query_ids(coll).notifier do |res|
+    @xi.xc.coll_query_ids(coll).notifier do |res|
       if res
         res.each do |id|
           add_song(id)
@@ -260,8 +260,8 @@ class UserInteract
     @main
   end
 
-  def initialize(xc, title, main=false)
-    @xc = xc
+  def initialize(slist, title, main=false)
+    @slist = slist
     @window = Gtk::Window.new()
     @window.title = title
     @main = main
@@ -311,7 +311,7 @@ class UserInteract
     end
 
     @window.signal_connect('destroy') do
-      @xc.destroy!
+      @slist.destroy!
       false
     end
 
@@ -344,9 +344,9 @@ class UserInteract
     if selection.selected_rows.length > 0
       return selection.selected_rows
     elsif @current_path
-      return [@xc.list.get_iter(@current_path)]
+      return [@slist.list.get_iter(@current_path)]
     else
-      return [@xc.list.iter_first]
+      return [@slist.list.iter_first]
     end
   end
 
@@ -355,7 +355,7 @@ class UserInteract
     if path.is_a? Gtk::TreeIter
       iter=path
     else
-      iter=@xc.list.get_iter(path)
+      iter=@slist.list.get_iter(path)
     end
     return iter
   end
@@ -364,7 +364,7 @@ class UserInteract
     item = Gtk::MenuItem.new("Rate to _#{i}")
     item.signal_connect("activate") {
       current_iters.each do |iter|
-        @xc.rate(iter,i)
+        @slist.rate(iter,i)
       end
     }
     return item
@@ -375,25 +375,25 @@ class UserInteract
       menu = Gtk::Menu.new
       item = Gtk::MenuItem.new("Show same _artist")
       item.signal_connect("activate") {
-        user_same(@xc.xc, "artist", current_iter[SongList::COL_ARTIST])
+        user_same(@slist.xi, "artist", current_iter[SongList::COL_ARTIST])
       }
       menu.append(item)
 
       item = Gtk::MenuItem.new("Show same al_bum")
       item.signal_connect("activate") {
-        user_same(@xc.xc, "album", current_iter[SongList::COL_ALBUM])
+        user_same(@slist.xi, "album", current_iter[SongList::COL_ALBUM])
       }
       menu.append(item)
 
       item = Gtk::MenuItem.new("Show same _title")
       item.signal_connect("activate") {
-        user_same(@xc.xc, "title", current_iter[SongList::COL_TITLE])
+        user_same(@slist.xi, "title", current_iter[SongList::COL_TITLE])
       }
       menu.append(item)
 
       item = Gtk::MenuItem.new("Rate _others")
       item.signal_connect("activate") {
-        user_parse(@xc.xc)
+        user_parse(@slist.xi)
       }
       menu.append(item)
 
@@ -401,7 +401,7 @@ class UserInteract
       item = Gtk::MenuItem.new("_Erase rating")
       item.signal_connect("activate") {
         current_iters.each do |iter|
-          @xc.erase_rating(iter)
+          @slist.erase_rating(iter)
         end
       }
       menu.append(item)
@@ -418,7 +418,7 @@ class UserInteract
   end
 
   def initialize_tree
-    @view = Gtk::TreeView.new(@xc.list)
+    @view = Gtk::TreeView.new(@slist.list)
     @view.selection.mode=Gtk::SELECTION_MULTIPLE
 
     scroll = Gtk::ScrolledWindow.new()
@@ -453,7 +453,7 @@ class UserInteract
       action_menu.popup(nil, nil, 0, Gdk::Event::CURRENT_TIME)
     }
 
-    @xc.list.signal_connect('row-inserted') do |model, path, iter|
+    @slist.list.signal_connect('row-inserted') do |model, path, iter|
       pos = scroll.vscrollbar.adjustment.value
       if pos == 0
         handler = scroll.vscrollbar.adjustment.signal_connect('changed') do
@@ -474,11 +474,11 @@ class UserInteract
     renderer = Gtk::CellRendererToggle.new
     renderer.activatable = true
     renderer.signal_connect('toggled') do |w,path|
-      iter = @xc.list.get_iter(path)
+      iter = @slist.list.get_iter(path)
       if iter[SongList::COL_RATING] == i
-        @xc.rate(iter, i-1)
+        @slist.rate(iter, i-1)
       else
-        @xc.rate(path,i)
+        @slist.rate(path,i)
       end
     end
     col.pack_start(renderer,false)
@@ -487,7 +487,7 @@ class UserInteract
 
   # TODO: reconnect would be better than quiting
   def watch_lost_conexion
-    @xc.xc.on_disconnect do
+    @slist.xi.xc.on_disconnect do
       dialog = Gtk::Dialog.new("Connection lost",
                                @window,
                                Gtk::Dialog::DESTROY_WITH_PARENT,
@@ -504,12 +504,12 @@ class UserInteract
 end
 
 
-def user_same(xc,field,value)
-  UserInteract.new(SongListCollection.equal(xc,field,value),
+def user_same(xi,field,value)
+  UserInteract.new(SongListCollection.equal(xi,field,value),
                    "#{field}: #{value}")
 end
 
-def user_parse(xc)
+def user_parse(xi)
   dialog=Gtk::Dialog.new("Rate from search",
                          nil,
                          Gtk::Dialog::DESTROY_WITH_PARENT,
@@ -527,7 +527,7 @@ def user_parse(xc)
   dialog.run do |response|
     if response == Gtk::Dialog::RESPONSE_ACCEPT
       begin
-        UserInteract.new(SongListCollection.parse(xc,entry.text),entry.text)
+        UserInteract.new(SongListCollection.parse(xi,entry.text),entry.text)
       rescue Exception => e
         message = Gtk::MessageDialog.new(nil,
                                         Gtk::Dialog::DESTROY_WITH_PARENT,
@@ -542,6 +542,6 @@ def user_parse(xc)
   end
 end
 
-user = UserInteract.new(SongListPlayed.new(XmmsInteract.new.xc),"Xmms Rater", true)
+user = UserInteract.new(SongListPlayed.new(XmmsInteract.new),"Xmms Rater", true)
 
 Gtk.main
