@@ -66,6 +66,15 @@ class XmmsInteract
   def remove_medialib_watcher(watcher)
     @looking_for_medialib_list.delete(watcher)
   end
+
+  def song_info(id, &body)
+    if id != 0
+      @xc.medialib_get_info(id).notifier do |info|
+        yield(id, get(info, :title), get(info, :artist), get(info, :album), get(info, :rating, "0").to_i)
+        false
+      end
+    end
+  end
 end
 
 class SongList
@@ -115,11 +124,8 @@ class SongList
   end
 
   def add_song(id)
-    if id != 0
-      @xi.xc.medialib_get_info(id).notifier do |info|
-        add_song_info(id, get(info, :title), get(info, :artist), get(info, :album), get(info, :rating, "0").to_i)
-        false
-      end
+    @xi.song_info(id) do |id, title, artist, album, rating|
+      add_song_info(id, title, artist, album, rating)
     end
   end
 
