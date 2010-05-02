@@ -119,8 +119,12 @@ class XmmsInteract
   end
 
   def rate(id,rate)
-    @xc.medialib_entry_property_set(id, :rating, rate, "client/generic").notifier do
-      false
+    if rate == 0
+      erase_rating(id)
+    else
+      @xc.medialib_entry_property_set(id, :rating, rate, "client/generic").notifier do
+        false
+      end
     end
   end
 end
@@ -183,38 +187,22 @@ class SongList
     end
   end
 
-  def erase_rating(path)
-    if path.is_a? Gtk::TreeIter
-      iter=path
-    else
-      iter=@list.get_iter(path)
-    end
-    if iter
-      @xi.erase_rating(iter[0])
-      update_rating(iter,0)
-    else
-      @xi.xc.playback_current_id.notifier do |id|
-        @xi.erase_rating(id)
-        false
-      end
-      update_rating(@list.iter_first,0)
-    end
-  end
-
   def rate(path,rate)
     if path.is_a? Gtk::TreeIter
       iter=path
     else
       iter=@list.get_iter(path)
     end
-    if rate == 0
-      erase_rating(iter)
-    else
+    if iter
       @xi.rate(iter[COL_ID],rate)
-      update_rating(iter,rate)
+      update_rating(iter, rate)
+    else
+      @xi.xc.playback_current_id.notifier do |id|
+        @xi.rate(id, rate)
+        false
+      end
     end
   end
-
 end
 
 class SongListPlayed < SongList
@@ -442,7 +430,7 @@ class UserInteract
       item = Gtk::MenuItem.new("_Erase rating")
       item.signal_connect("activate") {
         current_iters.each do |iter|
-          @slist.erase_rating(iter)
+          @slist.rate(iter,0)
         end
       }
       menu.append(item)
