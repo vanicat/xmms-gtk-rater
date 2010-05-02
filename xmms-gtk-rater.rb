@@ -25,7 +25,8 @@ def debug(*arg)
   puts(*arg)
 end
 
-class XmmsInteract
+
+class SongList
   attr_reader :list
   attr_reader :xc
 
@@ -143,7 +144,7 @@ class XmmsInteract
 
 end
 
-class XmmsInteractPlayed < XmmsInteract
+class SongListPlayed < SongList
   MAX_SONG = 50
 
   def remove_last_song()
@@ -184,7 +185,7 @@ class XmmsInteractPlayed < XmmsInteract
 
 end
 
-class XmmsInteractCollection < XmmsInteract
+class SongListCollection < SongList
 
   def initialize(xc,coll)
     super(xc)
@@ -221,13 +222,13 @@ class XmmsInteractCollection < XmmsInteract
   def self.equal(xc, field, value)
     coll = Xmms::Collection.universe.equal(field, value)
 
-    return XmmsInteractCollection.new(xc, coll)
+    return SongListCollection.new(xc, coll)
   end
 
   def self.parse(xc, pattern)
     coll = Xmms::Collection.parse(pattern)
 
-    return XmmsInteractCollection.new(xc, coll)
+    return SongListCollection.new(xc, coll)
   end
 end
 
@@ -352,19 +353,19 @@ class UserInteract
       menu = Gtk::Menu.new
       item = Gtk::MenuItem.new("Show same _artist")
       item.signal_connect("activate") {
-        user_same(@xc.xc, "artist", current_iter[XmmsInteract::COL_ARTIST])
+        user_same(@xc.xc, "artist", current_iter[SongList::COL_ARTIST])
       }
       menu.append(item)
 
       item = Gtk::MenuItem.new("Show same al_bum")
       item.signal_connect("activate") {
-        user_same(@xc.xc, "album", current_iter[XmmsInteract::COL_ALBUM])
+        user_same(@xc.xc, "album", current_iter[SongList::COL_ALBUM])
       }
       menu.append(item)
 
       item = Gtk::MenuItem.new("Show same _title")
       item.signal_connect("activate") {
-        user_same(@xc.xc, "title", current_iter[XmmsInteract::COL_TITLE])
+        user_same(@xc.xc, "title", current_iter[SongList::COL_TITLE])
       }
       menu.append(item)
 
@@ -402,11 +403,11 @@ class UserInteract
     scroll.add(@view)
     scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
 
-    initialize_std_col("Title", XmmsInteract::COL_TITLE)
+    initialize_std_col("Title", SongList::COL_TITLE)
 
-    initialize_std_col("Artist", XmmsInteract::COL_ARTIST)
+    initialize_std_col("Artist", SongList::COL_ARTIST)
 
-    initialize_std_col("Album", XmmsInteract::COL_ALBUM)
+    initialize_std_col("Album", SongList::COL_ALBUM)
 
     col = Gtk::TreeViewColumn.new("rating")
     for i in 1..5
@@ -415,7 +416,7 @@ class UserInteract
     col.expand=false
     @view.append_column(col)
 
-    @view.search_column=XmmsInteract::COL_TITLE
+    @view.search_column=SongList::COL_TITLE
 
     @view.signal_connect("button_press_event") do |widget, event|
       if event.kind_of? Gdk::EventButton and event.button == 3
@@ -452,14 +453,14 @@ class UserInteract
     renderer.activatable = true
     renderer.signal_connect('toggled') do |w,path|
       iter = @xc.list.get_iter(path)
-      if iter[XmmsInteract::COL_RATING] == i
+      if iter[SongList::COL_RATING] == i
         @xc.rate(iter, i-1)
       else
         @xc.rate(path,i)
       end
     end
     col.pack_start(renderer,false)
-    col.add_attribute(renderer, :active, i+XmmsInteract::COL_RATING)
+    col.add_attribute(renderer, :active, i+SongList::COL_RATING)
   end
 
   # TODO: reconnect would be better than quiting
@@ -482,7 +483,7 @@ end
 
 
 def user_same(xc,field,value)
-  UserInteract.new(XmmsInteractCollection.equal(xc,field,value),
+  UserInteract.new(SongListCollection.equal(xc,field,value),
                    "#{field}: #{value}")
 end
 
@@ -504,7 +505,7 @@ def user_parse(xc)
   dialog.run do |response|
     if response == Gtk::Dialog::RESPONSE_ACCEPT
       begin
-        UserInteract.new(XmmsInteractCollection.parse(xc,entry.text),entry.text)
+        UserInteract.new(SongListCollection.parse(xc,entry.text),entry.text)
       rescue Exception => e
         message = Gtk::MessageDialog.new(nil,
                                         Gtk::Dialog::DESTROY_WITH_PARENT,
@@ -529,6 +530,6 @@ end
 
 xc.add_to_glib_mainloop
 
-user = UserInteract.new(XmmsInteractPlayed.new(xc),"Xmms Rater", true)
+user = UserInteract.new(SongListPlayed.new(xc),"Xmms Rater", true)
 
 Gtk.main
