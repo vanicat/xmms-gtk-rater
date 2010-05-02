@@ -26,6 +26,21 @@ def debug(*arg)
 end
 
 
+class XmmsInteract
+  attr_reader :xc
+  def initialize
+    begin
+      @xc = Xmms::Client.new('GtkRater').connect(ENV['XMMS_PATH'])
+    rescue Xmms::Client::ClientError
+      puts 'Failed to connect to XMMS2 daemon.'
+      puts 'Please make sure xmms2d is running and using the correct IPC path.'
+      exit
+    end
+
+    @xc.add_to_glib_mainloop
+  end
+end
+
 class SongList
   attr_reader :list
   attr_reader :xc
@@ -520,16 +535,6 @@ def user_parse(xc)
   end
 end
 
-begin
-  xc = Xmms::Client.new('GtkRater').connect(ENV['XMMS_PATH'])
-rescue Xmms::Client::ClientError
-  puts 'Failed to connect to XMMS2 daemon.'
-  puts 'Please make sure xmms2d is running and using the correct IPC path.'
-  exit
-end
-
-xc.add_to_glib_mainloop
-
-user = UserInteract.new(SongListPlayed.new(xc),"Xmms Rater", true)
+user = UserInteract.new(SongListPlayed.new(XmmsInteract.new.xc),"Xmms Rater", true)
 
 Gtk.main
