@@ -179,12 +179,6 @@ class SongList
   COL_ALBUM = 3
   COL_RATING = 4
 
-  def get(info, attr, default=nil)
-    info[attr].map[0][1]
-  rescue NoMethodError => e
-    default
-  end
-
   def destroy!
     @runing = false
     @list = nil
