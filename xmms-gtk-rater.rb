@@ -103,21 +103,26 @@ class XmmsInteract
         view.on_server_disconnect!
       end
 
-      GLib::Timeout.add_seconds(10) do
-        res = connect!
-        if res
-          @views.each do |view|
-            view.on_server_reconnect!
-          end
-          false
-        else
-          true
+      unless reconnect!
+        GLib::Timeout.add_seconds(10) do
+          not reconnect!
         end
       end
     end
 
     return true
   end
+
+  def reconnect!
+    res = connect!
+    if res
+      @views.each do |view|
+        view.on_server_reconnect!
+      end
+    end
+    res
+  end
+
 
   def add_medialib_watcher(watcher)
     @looking_for_medialib_list << watcher
