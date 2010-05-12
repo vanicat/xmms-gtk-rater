@@ -1,16 +1,19 @@
 #!/usr/bin/env ruby
-# Copyright (c) 2010 Rémi Vanicat
 
+# [[id:febdc89b-bfbc-4782-bf53-8b19ff298cf4][block-2]]
+
+# Copyright (c) 2010 Rémi Vanicat
+# 
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
 # to deal in the Software without restriction, including without limitation
 # the rights to use, copy, modify, merge, publish, distribute, sublicense,
 # and/or sell copies of the Software, and to permit persons to whom the
 # Software is furnished to do so, subject to the following conditions:
-
+# 
 # The above copyright notice and this permission notice shall be included in
 # all copies or substantial portions of the Software.
-
+# 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -18,10 +21,13 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-
+# 
 # Except as contained in this notice, the name of Rémi Vanicat shall not be
 # used in advertising or otherwise to promote the sale, use or other dealings
 # in this Software without prior written authorization from Rémi Vanicat.
+
+# This code is wrote using org-mode's babel's litterate programing
+# you should modify xmms-gtk-rater.org, and not xmms-gtk-rater directly.
 
 require 'xmmsclient'
 require 'xmmsclient_glib'
@@ -47,7 +53,6 @@ end
 def debug(*arg)
   puts(*arg)
 end
-
 
 class XmmsInteract
   def get(info, attr, default=nil)
@@ -594,7 +599,6 @@ class UserInteract
   end
 end
 
-
 def user_same(xi,field,value)
   UserInteract.new(SongListCollection.equal(xi,field,value),
                    "#{field}: #{value}")
@@ -636,3 +640,4 @@ end
 user = UserInteract.new(SongListPlayed.new(XmmsInteract.new),"Xmms Rater", true)
 
 Gtk.main
+# block-2 ends here
