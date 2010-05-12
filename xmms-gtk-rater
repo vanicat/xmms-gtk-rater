@@ -218,28 +218,20 @@ class SongList
   COL_ALBUM = 3
   COL_RATING = 4
 
+  def initialize(xi)
+    @xi = xi
+  
+    @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
+  
+    @runing = true
+  
+    @xi.add_medialib_watcher(self)
+  end
+  
   def destroy!
     @runing = false
     @list = nil
     @xi.remove_medialib_watcher(self)
-  end
-
-  def register(view)
-    @xi.register_connection_watcher(view)
-  end
-
-  def unregister(view)
-    @xi.unregister_connection_watcher(view)
-  end
-
-  def initialize(xi)
-    @xi = xi
-
-    @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
-
-    @runing = true
-
-    @xi.add_medialib_watcher(self)
   end
 
   def set_song_infos(iter, id, title, artist, album, rating)
@@ -249,23 +241,31 @@ class SongList
     iter[COL_ALBUM]=album || "UNKNOW"
     update_rating(iter, rating)
   end
-
-  def song_changed(id, title, artist, album, rating)
-    @list.each do |model,path,iter|
-      set_song_infos(iter, id, title, artist, album, rating) if iter[0] == id
-    end
-  end
-
-  def add_song_info(id, title, artist, album, rating)
-    iter = @list.prepend
-    set_song_infos(iter, id, title, artist, album, rating)
-  end
-
+  
   def update_rating(iter,rate)
     iter[COL_RATING]=rate
     for i in 1..5
       iter[COL_RATING+i] = rate >= i
     end
+  end
+  
+  def song_changed(id, title, artist, album, rating)
+    @list.each do |model,path,iter|
+      set_song_infos(iter, id, title, artist, album, rating) if iter[0] == id
+    end
+  end
+  
+  def add_song_info(id, title, artist, album, rating)
+    iter = @list.prepend
+    set_song_infos(iter, id, title, artist, album, rating)
+  end
+
+  def register(view)
+    @xi.register_connection_watcher(view)
+  end
+
+  def unregister(view)
+    @xi.unregister_connection_watcher(view)
   end
 
   def rate(path,rate)

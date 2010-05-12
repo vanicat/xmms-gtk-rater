@@ -318,29 +318,34 @@ Copyright: (c) 2010 Rémi Vanicat
     end
   end
 #+end_src
-
-
 * The songs lists
   :PROPERTIES:
   :ID:       c4114fc3-2599-40c6-84cf-ecd2721700a0
   :END:
 #+source: songs-lists
 #+begin_src ruby
+  <<mother-song>>
+
+  <<list-for-played-song>>
+
+  <<list-for-collection>>
+#+end_src
+
+** First, the common functionality for songs list
+   :PROPERTIES:
+   :ID:       5b0220e9-bb81-48d8-8a06-069dfffa82c8
+   :END:
+#+source: mother-song
+#+begin_src ruby :noweb yes
   class SongList
     attr_reader :list
     attr_reader :xi
 
-    COL_ID = 0
-    COL_TITLE = 1
-    COL_ARTIST = 2
-    COL_ALBUM = 3
-    COL_RATING = 4
+    <<song-list-column>>
 
-    def destroy!
-      @runing = false
-      @list = nil
-      @xi.remove_medialib_watcher(self)
-    end
+    <<life-and-death>>
+
+    <<update-songs>>
 
     def register(view)
       @xi.register_connection_watcher(view)
@@ -350,22 +355,62 @@ Copyright: (c) 2010 Rémi Vanicat
       @xi.unregister_connection_watcher(view)
     end
 
-    def initialize(xi)
-      @xi = xi
+    <<changing-rating>>
+  end
+#+end_src
+*** There is some constant
+    :PROPERTIES:
+    :ID:       fd83eb5b-63ab-4973-bd16-643c31fae9cb
+    :END:
+#+source: song-list-column
+#+begin_src ruby
+  COL_ID = 0
+  COL_TITLE = 1
+  COL_ARTIST = 2
+  COL_ALBUM = 3
+  COL_RATING = 4
+#+end_src
+*** birth and death of the list
+    :PROPERTIES:
+    :ID:       82627508-ee32-4975-86c9-6001aab246e0
+    :END:
+#+source: life-and-death
+#+begin_src ruby
+  def initialize(xi)
+    @xi = xi
 
-      @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
+    @list = Gtk::ListStore.new(Integer,String, String, String, Integer, TrueClass, TrueClass, TrueClass, TrueClass, TrueClass)
 
-      @runing = true
+    @runing = true
 
-      @xi.add_medialib_watcher(self)
-    end
+    @xi.add_medialib_watcher(self)
+  end
 
+  def destroy!
+    @runing = false
+    @list = nil
+    @xi.remove_medialib_watcher(self)
+  end
+#+end_src
+*** Getting and updating songs info
+    :PROPERTIES:
+    :ID:       dea10c92-9002-46d5-874c-e24486a4c716
+    :END:
+#+source: update-songs
+#+begin_src ruby :noweb yes
     def set_song_infos(iter, id, title, artist, album, rating)
       iter[COL_ID]=id
       iter[COL_TITLE]=title || "UNKNOW"
       iter[COL_ARTIST]=artist || "UNKNOW"
       iter[COL_ALBUM]=album || "UNKNOW"
       update_rating(iter, rating)
+    end
+
+    def update_rating(iter,rate)
+      iter[COL_RATING]=rate
+      for i in 1..5
+        iter[COL_RATING+i] = rate >= i
+      end
     end
 
     def song_changed(id, title, artist, album, rating)
@@ -378,14 +423,13 @@ Copyright: (c) 2010 Rémi Vanicat
       iter = @list.prepend
       set_song_infos(iter, id, title, artist, album, rating)
     end
-
-    def update_rating(iter,rate)
-      iter[COL_RATING]=rate
-      for i in 1..5
-        iter[COL_RATING+i] = rate >= i
-      end
-    end
-
+#+end_src
+*** Changing the rating
+    :PROPERTIES:
+    :ID:       1a3f6eee-4fb5-4305-bfa4-28d44e6cd65b
+    :END:
+#+source: changing-rating
+#+begin_src ruby :noweb yes
     def rate(path,rate)
       if path.is_a? Gtk::TreeIter
         iter=path
@@ -402,7 +446,7 @@ Copyright: (c) 2010 Rémi Vanicat
         end
       end
     end
-  end
+#+end_src
 
   class SongListPlayed < SongList
     MAX_SONG = 50
