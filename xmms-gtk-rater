@@ -225,11 +225,11 @@ class SongList
   end
 
   def register(view)
-    xi.register_connection_watcher(view)
+    @xi.register_connection_watcher(view)
   end
 
   def unregister(view)
-    xi.unregister_connection_watcher(view)
+    @xi.unregister_connection_watcher(view)
   end
 
   def initialize(xi)
