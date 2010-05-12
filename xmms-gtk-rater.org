@@ -448,6 +448,12 @@ Copyright: (c) 2010 Rémi Vanicat
     end
 #+end_src
 
+** The list for played songs
+   :PROPERTIES:
+   :ID:       5a398c91-2d6a-4a5d-bbfc-4fca5fbaf3fa
+   :END:
+#+source: list-for-played-song
+#+begin_src ruby
   class SongListPlayed < SongList
     MAX_SONG = 50
 
@@ -483,7 +489,10 @@ Copyright: (c) 2010 Rémi Vanicat
     end
 
   end
+#+end_src
 
+#+source: list-for-collection
+#+begin_src ruby
   class SongListCollection < SongList
 
     def initialize(xc,coll)
@@ -526,250 +535,259 @@ Copyright: (c) 2010 Rémi Vanicat
     end
   end
 #+end_src
-
+* Interacting with the user
+  :PROPERTIES:
+  :ID:       a344f483-0f1f-4fa9-8380-c0f01ffe11b9
+  :END:
 #+source: user-interaction
 #+begin_src ruby
-class UserInteract
+  class UserInteract
 
-  def main?
-    @main
-  end
+    def main?
+      @main
+    end
 
-  def on_server_reconnect!
-    @window.sensitive=true
-  end
+    def on_server_reconnect!
+      @window.sensitive=true
+    end
 
-  def on_server_disconnect!
-    @window.sensitive=false
-  end
+    def on_server_disconnect!
+      @window.sensitive=false
+    end
 
-  def initialize(slist, title, main=false)
-    @slist = slist
-    @window = Gtk::Window.new()
-    @window.title = title
-    @main = main
+    def initialize(slist, title, main=false)
+      @slist = slist
+      @window = Gtk::Window.new()
+      @window.title = title
+      @main = main
 
-    @slist.register(self)
+      @slist.register(self)
 
-    view = initialize_tree()
+      view = initialize_tree()
 
-    pack = Gtk::VBox.new()
-    menubar = Gtk::MenuBar.new
+      pack = Gtk::VBox.new()
+      menubar = Gtk::MenuBar.new
 
-    ag = Gtk::AccelGroup.new
+      ag = Gtk::AccelGroup.new
 
-    file = Gtk::MenuItem.new("_File")
-    file.submenu=Gtk::Menu.new
-    file.submenu.accel_group=ag
+      file = Gtk::MenuItem.new("_File")
+      file.submenu=Gtk::Menu.new
+      file.submenu.accel_group=ag
 
-    action = Gtk::MenuItem.new("_Action")
-    action.submenu = action_menu
-    action.submenu.accel_group=ag
+      action = Gtk::MenuItem.new("_Action")
+      action.submenu = action_menu
+      action.submenu.accel_group=ag
 
-    if not main?
-      close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE,ag)
-      close.signal_connect('activate') do
-        @window.destroy
+      if not main?
+        close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE,ag)
+        close.signal_connect('activate') do
+          @window.destroy
+          false
+        end
+        file.submenu.append(close)
+      end
+
+      quit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT,ag)
+
+      quit.signal_connect('activate') do
+        Gtk.main_quit
         false
       end
-      file.submenu.append(close)
-    end
 
-    quit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT,ag)
+      file.submenu.append(quit)
 
-    quit.signal_connect('activate') do
-      Gtk.main_quit
-      false
-    end
+      menubar.append(file)
+      menubar.append(action)
 
-    file.submenu.append(quit)
+      @window.add(pack)
+      pack.pack_start(menubar,false,false,1)
+      pack.pack_start(view,true,true,1)
 
-    menubar.append(file)
-    menubar.append(action)
+      @window.signal_connect('delete_event') do
+        false
+      end
 
-    @window.add(pack)
-    pack.pack_start(menubar,false,false,1)
-    pack.pack_start(view,true,true,1)
-
-    @window.signal_connect('delete_event') do
-      false
-    end
-
-    @window.signal_connect('destroy') do
-      @slist.unregister(self)
-      @slist.destroy!
-      false
-    end
-
-    if main?
       @window.signal_connect('destroy') do
-        Gtk.main_quit
+        @slist.unregister(self)
+        @slist.destroy!
+        false
+      end
+
+      if main?
+        @window.signal_connect('destroy') do
+          Gtk.main_quit
+        end
+      end
+
+      @window.add_accel_group(ag)
+      @window.show_all
+    end
+
+    def initialize_std_col(title, colnum)
+      renderer = Gtk::CellRendererText.new
+      renderer.ellipsize = Pango::ELLIPSIZE_END
+      col = Gtk::TreeViewColumn.new(title,renderer, :text => colnum)
+      col.expand = true
+      col.resizable = true
+      col.sizing = Gtk::TreeViewColumn::FIXED
+      col.fixed_width = 120
+      col.sort_column_id = colnum unless main?
+      @view.append_column(col)
+    end
+
+    def current_iters
+      selection = @view.selection
+      if selection.selected_rows.length > 0
+        return selection.selected_rows
+      elsif @current_path
+        return [@slist.list.get_iter(@current_path)]
+      else
+        return [@slist.list.iter_first]
       end
     end
 
-    @window.add_accel_group(ag)
-    @window.show_all
-  end
-
-  def initialize_std_col(title, colnum)
-    renderer = Gtk::CellRendererText.new
-    renderer.ellipsize = Pango::ELLIPSIZE_END
-    col = Gtk::TreeViewColumn.new(title,renderer, :text => colnum)
-    col.expand = true
-    col.resizable = true
-    col.sizing = Gtk::TreeViewColumn::FIXED
-    col.fixed_width = 120
-    col.sort_column_id = colnum unless main?
-    @view.append_column(col)
-  end
-
-  def current_iters
-    selection = @view.selection
-    if selection.selected_rows.length > 0
-      return selection.selected_rows
-    elsif @current_path
-      return [@slist.list.get_iter(@current_path)]
-    else
-      return [@slist.list.iter_first]
-    end
-  end
-
-  def current_iter
-    path = current_iters[0]     # Using alway the first ???
-    if path.is_a? Gtk::TreeIter
-      iter=path
-    else
-      iter=@slist.list.get_iter(path)
-    end
-    return iter
-  end
-
-  def rating_menu(i)
-    item = Gtk::MenuItem.new("Rate to _#{i}")
-    item.signal_connect("activate") {
-      current_iters.each do |iter|
-        @slist.rate(iter,i)
+    def current_iter
+      path = current_iters[0]     # Using alway the first ???
+      if path.is_a? Gtk::TreeIter
+        iter=path
+      else
+        iter=@slist.list.get_iter(path)
       end
-    }
-    return item
-  end
+      return iter
+    end
 
-  def action_menu
-    unless @action_menu
-      menu = Gtk::Menu.new
-      item = Gtk::MenuItem.new("Show same _artist")
-      item.signal_connect("activate") {
-        user_same(@slist.xi, "artist", current_iter[SongList::COL_ARTIST])
-      }
-      menu.append(item)
-
-      item = Gtk::MenuItem.new("Show same al_bum")
-      item.signal_connect("activate") {
-        user_same(@slist.xi, "album", current_iter[SongList::COL_ALBUM])
-      }
-      menu.append(item)
-
-      item = Gtk::MenuItem.new("Show same _title")
-      item.signal_connect("activate") {
-        user_same(@slist.xi, "title", current_iter[SongList::COL_TITLE])
-      }
-      menu.append(item)
-
-      item = Gtk::MenuItem.new("Rate _others")
-      item.signal_connect("activate") {
-        user_parse(@slist.xi)
-      }
-      menu.append(item)
-
-
-      item = Gtk::MenuItem.new("_Erase rating")
+    def rating_menu(i)
+      item = Gtk::MenuItem.new("Rate to _#{i}")
       item.signal_connect("activate") {
         current_iters.each do |iter|
-          @slist.rate(iter,0)
+          @slist.rate(iter,i)
         end
       }
-      menu.append(item)
+      return item
+    end
 
-      for i in 1..5
-        item=rating_menu(i)
+    def action_menu
+      unless @action_menu
+        menu = Gtk::Menu.new
+        item = Gtk::MenuItem.new("Show same _artist")
+        item.signal_connect("activate") {
+          user_same(@slist.xi, "artist", current_iter[SongList::COL_ARTIST])
+        }
         menu.append(item)
-      end
 
-      menu.show_all
-      @action_menu = menu
-    end
-    return @action_menu
-  end
+        item = Gtk::MenuItem.new("Show same al_bum")
+        item.signal_connect("activate") {
+          user_same(@slist.xi, "album", current_iter[SongList::COL_ALBUM])
+        }
+        menu.append(item)
 
-  def initialize_tree
-    @view = Gtk::TreeView.new(@slist.list)
-    @view.selection.mode=Gtk::SELECTION_MULTIPLE
+        item = Gtk::MenuItem.new("Show same _title")
+        item.signal_connect("activate") {
+          user_same(@slist.xi, "title", current_iter[SongList::COL_TITLE])
+        }
+        menu.append(item)
 
-    scroll = Gtk::ScrolledWindow.new()
-    scroll.add(@view)
-    scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
+        item = Gtk::MenuItem.new("Rate _others")
+        item.signal_connect("activate") {
+          user_parse(@slist.xi)
+        }
+        menu.append(item)
 
-    initialize_std_col("Title", SongList::COL_TITLE)
 
-    initialize_std_col("Artist", SongList::COL_ARTIST)
-
-    initialize_std_col("Album", SongList::COL_ALBUM)
-
-    col = Gtk::TreeViewColumn.new("rating")
-    for i in 1..5
-      initialize_rater_toggle(col,i)
-    end
-    col.expand=false
-    @view.append_column(col)
-
-    @view.search_column=SongList::COL_TITLE
-
-    @view.signal_connect("button_press_event") do |widget, event|
-      if event.kind_of? Gdk::EventButton and event.button == 3
-        path = @view.get_path(event.x, event.y)
-        @current_path = path[0] if path
-        action_menu.popup(nil, nil, event.button, event.time)
-      end
-    end
-
-    @view.signal_connect("popup_menu") {
-      @current_path = nil
-      action_menu.popup(nil, nil, 0, Gdk::Event::CURRENT_TIME)
-    }
-
-    @slist.list.signal_connect('row-inserted') do |model, path, iter|
-      pos = scroll.vscrollbar.adjustment.value
-      if pos == 0
-        handler = scroll.vscrollbar.adjustment.signal_connect('changed') do
-          scroll.vscrollbar.adjustment.signal_handler_disconnect(handler)
-          GLib::Idle.add do
-            scroll.vscrollbar.adjustment.value = 0
-            false
+        item = Gtk::MenuItem.new("_Erase rating")
+        item.signal_connect("activate") {
+          current_iters.each do |iter|
+            @slist.rate(iter,0)
           end
+        }
+        menu.append(item)
+
+        for i in 1..5
+          item=rating_menu(i)
+          menu.append(item)
+        end
+
+        menu.show_all
+        @action_menu = menu
+      end
+      return @action_menu
+    end
+
+    def initialize_tree
+      @view = Gtk::TreeView.new(@slist.list)
+      @view.selection.mode=Gtk::SELECTION_MULTIPLE
+
+      scroll = Gtk::ScrolledWindow.new()
+      scroll.add(@view)
+      scroll.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC)
+
+      initialize_std_col("Title", SongList::COL_TITLE)
+
+      initialize_std_col("Artist", SongList::COL_ARTIST)
+
+      initialize_std_col("Album", SongList::COL_ALBUM)
+
+      col = Gtk::TreeViewColumn.new("rating")
+      for i in 1..5
+        initialize_rater_toggle(col,i)
+      end
+      col.expand=false
+      @view.append_column(col)
+
+      @view.search_column=SongList::COL_TITLE
+
+      @view.signal_connect("button_press_event") do |widget, event|
+        if event.kind_of? Gdk::EventButton and event.button == 3
+          path = @view.get_path(event.x, event.y)
+          @current_path = path[0] if path
+          action_menu.popup(nil, nil, event.button, event.time)
         end
       end
-      true
-    end
 
-    return scroll
-  end
+      @view.signal_connect("popup_menu") {
+        @current_path = nil
+        action_menu.popup(nil, nil, 0, Gdk::Event::CURRENT_TIME)
+      }
 
-  def initialize_rater_toggle(col,i)
-    renderer = Gtk::CellRendererToggle.new
-    renderer.activatable = true
-    renderer.signal_connect('toggled') do |w,path|
-      iter = @slist.list.get_iter(path)
-      if iter[SongList::COL_RATING] == i
-        @slist.rate(iter, i-1)
-      else
-        @slist.rate(path,i)
+      @slist.list.signal_connect('row-inserted') do |model, path, iter|
+        pos = scroll.vscrollbar.adjustment.value
+        if pos == 0
+          handler = scroll.vscrollbar.adjustment.signal_connect('changed') do
+            scroll.vscrollbar.adjustment.signal_handler_disconnect(handler)
+            GLib::Idle.add do
+              scroll.vscrollbar.adjustment.value = 0
+              false
+            end
+          end
+        end
+        true
       end
+
+      return scroll
     end
-    col.pack_start(renderer,false)
-    col.add_attribute(renderer, :active, i+SongList::COL_RATING)
+
+    def initialize_rater_toggle(col,i)
+      renderer = Gtk::CellRendererToggle.new
+      renderer.activatable = true
+      renderer.signal_connect('toggled') do |w,path|
+        iter = @slist.list.get_iter(path)
+        if iter[SongList::COL_RATING] == i
+          @slist.rate(iter, i-1)
+        else
+          @slist.rate(path,i)
+        end
+      end
+      col.pack_start(renderer,false)
+      col.add_attribute(renderer, :active, i+SongList::COL_RATING)
+    end
   end
-end
 #+end_src
+
+
+* Connecting the dot, and running all this
+  :PROPERTIES:
+  :ID:       d7319434-31e9-41b7-a9e4-19759edaaaeb
+  :END:
 
 #+source: runing-it
 #+begin_src ruby
