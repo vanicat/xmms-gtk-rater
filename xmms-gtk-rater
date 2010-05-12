@@ -59,6 +59,7 @@ class XmmsInteract
     info[attr].map[0][1]
   rescue NoMethodError => e
     default
+  
   end
 
   def initialize
@@ -70,8 +71,6 @@ class XmmsInteract
       puts 'Please make sure xmms2d is running and using the correct IPC path.'
       exit
     end
-
-
   end
 
   def connect!
@@ -80,44 +79,28 @@ class XmmsInteract
     rescue Xmms::Client::ClientError
       return false
     end
-
+  
     @xc.add_to_glib_mainloop
-
-    @xc.broadcast_medialib_entry_changed.notifier do |id|
-      song_info(id) do |id, title, artist, album, rating|
-        @looking_for_medialib_list.each do |list|
-          list.song_changed(id, title, artist, album, rating)
-        end
-        true
-      end
-      true
-    end
-
-    @xc.broadcast_playback_current_id.notifier do |id|
-      song_info(id) do |id, title, artist, album, rating|
-        @current_song_watcher.each do |watcher|
-          watcher.current_song_info(id, title, artist, album, rating)
-        end
-        true
-      end
-      true
-    end
-
+  
+    looking_for_entry_change
+  
+    looking_at_current_song
+  
     @xc.on_disconnect do
       @views.each do |view|
         view.on_server_disconnect!
       end
-
+  
       unless reconnect!
         GLib::Timeout.add_seconds(10) do
           not reconnect!
         end
       end
     end
-
+  
     return true
   end
-
+  
   def reconnect!
     res = connect!
     if res
@@ -127,31 +110,47 @@ class XmmsInteract
     end
     res
   end
+  
+  def register_connection_watcher(view)
+    @views << view
+  end
+  
+  def unregister_connection_watcher(view)
+    @views.delete(view)
+  end
 
-
+  def looking_for_entry_change
+    @xc.broadcast_medialib_entry_changed.notifier do |id|
+      song_info(id) do |id, title, artist, album, rating|
+        @looking_for_medialib_list.each do |list|
+          list.song_changed(id, title, artist, album, rating)
+        end
+        true
+      end
+      true
+    end
+  end
+  
   def add_medialib_watcher(watcher)
     @looking_for_medialib_list << watcher
   end
-
+  
   def remove_medialib_watcher(watcher)
     @looking_for_medialib_list.delete(watcher)
   end
-
-  def current_id(&body)
-    @xc.playback_current_id.notifier do |id|
-      yield(id)
-    end
-  end
-
-  def song_info(id, &body)
-    if id != 0
-      @xc.medialib_get_info(id).notifier do |info|
-        yield(id, get(info, :title), get(info, :artist), get(info, :album), get(info, :rating, "0").to_i)
-        false
+  
+  def looking_at_current_song
+    @xc.broadcast_playback_current_id.notifier do |id|
+      song_info(id) do |id, title, artist, album, rating|
+        @current_song_watcher.each do |watcher|
+          watcher.current_song_info(id, title, artist, album, rating)
+        end
+        true
       end
+      true
     end
   end
-
+  
   def add_current_song_watcher(watcher)
     current_id do |id|
       song_info(id) do |id, title, artist, album, rating|
@@ -161,11 +160,26 @@ class XmmsInteract
     end
     @current_song_watcher << watcher
   end
-
+  
   def remove_current_song_watcher(watcher)
     @current_song_watcher.delete(watcher)
   end
 
+  def current_id(&body)
+    @xc.playback_current_id.notifier do |id|
+      yield(id)
+    end
+  end
+  
+  def song_info(id, &body)
+    if id != 0
+      @xc.medialib_get_info(id).notifier do |info|
+        yield(id, get(info, :title), get(info, :artist), get(info, :album), get(info, :rating, "0").to_i)
+        false
+      end
+    end
+  end
+  
   def coll_each_song(coll, &body)
     @xc.coll_query_ids(coll).notifier do |res|
       if res
@@ -182,7 +196,7 @@ class XmmsInteract
       false
     end
   end
-
+  
   def rate(id,rate)
     if rate == 0
       erase_rating(id)
@@ -191,14 +205,6 @@ class XmmsInteract
         false
       end
     end
-  end
-
-  def register_view(view)
-    @views << view
-  end
-
-  def unregister_view(view)
-    @views.delete(view)
   end
 end
 
@@ -219,11 +225,11 @@ class SongList
   end
 
   def register(view)
-    xi.register_view(view)
+    xi.register_connection_watcher(view)
   end
 
   def unregister(view)
-    xi.unregister_view(view)
+    xi.unregister_connection_watcher(view)
   end
 
   def initialize(xi)
