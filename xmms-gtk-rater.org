@@ -328,9 +328,12 @@ Copyright: (c) 2010 Rémi Vanicat
     end
   end
 
-
   def playlist_list
     @playlist_list
+  end
+
+  def add_to_playlist(id, pl)
+    Xmms::Playlist.new(@xc, pl).add_entry(id)
   end
 #+end_src
 ** To be worth something, we know change things on the server
@@ -484,6 +487,8 @@ Copyright: (c) 2010 Rémi Vanicat
     end
 
     <<changing-rating>>
+
+    <<adding-toplaylist>>
 #+end_src
 **** Changing the rating
     :PROPERTIES:
@@ -494,6 +499,18 @@ Copyright: (c) 2010 Rémi Vanicat
   def rate(path,rate)
     with_id(path) do |id|
       @xi.rate(id, rate)
+    end
+  end
+#+end_src
+**** Adding to playlist
+     :PROPERTIES:
+     :ID:       e43e069d-4237-4b57-8ba8-6b89b92b194f
+     :END:
+#+source: adding-toplaylist
+#+begin_src ruby
+  def add_to_playlist(path, pl)
+    with_id(path) do |id|
+      @xi.add_to_playlist(id, pl)
     end
   end
 #+end_src
@@ -759,7 +776,9 @@ Copyright: (c) 2010 Rémi Vanicat
         item = Gtk::MenuItem.new("_Add to playlist")
         menu.signal_connect("show") do
           item.submenu = playlist_menu do |pl|
-            puts pl
+            current_iters.each do |iter|
+              @slist.add_to_playlist(iter, pl)
+            end
           end
         end
         menu.append(item)
@@ -780,10 +799,10 @@ Copyright: (c) 2010 Rémi Vanicat
             item.signal_connect("activate") do
               body.call(playlist)
             end
-	    menu.append(item)
+            menu.append(item)
           end
         end
-	menu.show_all
+        menu.show_all
         menu
       else
         nil

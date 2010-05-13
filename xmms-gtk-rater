@@ -232,9 +232,12 @@ class XmmsInteract
     end
   end
   
-  
   def playlist_list
     @playlist_list
+  end
+  
+  def add_to_playlist(id, pl)
+    Xmms::Playlist.new(@xc, pl).add_entry(id)
   end
 end
 
@@ -317,6 +320,12 @@ class SongList
   def rate(path,rate)
     with_id(path) do |id|
       @xi.rate(id, rate)
+    end
+  end
+  
+  def add_to_playlist(path, pl)
+    with_id(path) do |id|
+      @xi.add_to_playlist(id, pl)
     end
   end
 end
@@ -568,7 +577,9 @@ class UserInteract
       item = Gtk::MenuItem.new("_Add to playlist")
       menu.signal_connect("show") do
         item.submenu = playlist_menu do |pl|
-          puts pl
+          current_iters.each do |iter|
+            @slist.add_to_playlist(iter, pl)
+          end
         end
       end
       menu.append(item)
