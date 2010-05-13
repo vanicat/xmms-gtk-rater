@@ -560,10 +560,38 @@ class UserInteract
         menu.append(item)
       end
 
+      item = Gtk::MenuItem.new("_Add to playlist")
+      menu.signal_connect("show") do
+        item.submenu = playlist_menu do |pl|
+          puts pl
+        end
+      end
+      menu.append(item)
+
       menu.show_all
       @action_menu = menu
     end
     return @action_menu
+  end
+
+  def playlist_menu(&body)
+    playlists = @slist.xi.playlist_list
+    if playlists
+      menu = Gtk::Menu.new
+      playlists.each do |playlist|
+        unless playlist =~ /^_/
+          item = Gtk::MenuItem.new(playlist, use_underline = false)
+          item.signal_connect("activate") do
+            body.call(playlist)
+          end
+          menu.append(item)
+        end
+      end
+      menu.show_all
+      menu
+    else
+      nil
+    end
   end
 
   def initialize_tree
