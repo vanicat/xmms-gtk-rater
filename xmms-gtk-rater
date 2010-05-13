@@ -298,20 +298,25 @@ class SongList
     @xi.unregister_connection_watcher(view)
   end
 
-  def rate(path,rate)
+  def with_id(path,&body)
     if path.is_a? Gtk::TreeIter
       iter=path
     else
       iter=@list.get_iter(path)
     end
     if iter
-      @xi.rate(iter[COL_ID],rate)
-      update_rating(iter, rate)
+      body.call(iter[COL_ID])
     else
       @xi.current_id do |id|
-        @xi.rate(id, rate)
+        body.call(id)
         false
       end
+    end
+  end
+  
+  def rate(path,rate)
+    with_id(path) do |id|
+      @xi.rate(id, rate)
     end
   end
 end
