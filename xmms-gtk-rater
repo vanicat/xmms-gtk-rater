@@ -86,6 +86,8 @@ class XmmsInteract
   
     looking_at_current_song
   
+    initialize_playlist
+  
     @xc.on_disconnect do
       @views.each do |view|
         view.on_server_disconnect!
@@ -205,6 +207,34 @@ class XmmsInteract
         false
       end
     end
+  end
+
+  PLAYLIST_REMOVE = 3
+  PLAYLIST_CREATE = 0
+  
+  def initialize_playlist
+    @playlist_list = nil
+    @xc.playlist_list.notifier do |res|
+      @playlist_list  = res.sort!
+      true
+    end
+  
+    @xc.broadcast_coll_changed.notifier do |res|
+      if res[:namespace] == "Playlists"
+        if res[:type] == PLAYLIST_REMOVE
+          @playlist_list.delete(res[:name])
+        elsif res[:type] == PLAYLIST_CREATE
+          @playlist_list << res[:name]
+          @playlist_list.sort!
+        end
+      end
+      true
+    end
+  end
+  
+  
+  def playlist_list
+    @playlist_list
   end
 end
 

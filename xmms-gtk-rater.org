@@ -123,6 +123,8 @@ Copyright: (c) 2010 Rémi Vanicat
     <<reading-server-information>>
 
     <<changing-the-library>>
+
+    <<playlist-handling>>
   end
 #+end_src
 
@@ -174,6 +176,8 @@ Copyright: (c) 2010 Rémi Vanicat
 
     looking_at_current_song
 
+    initialize_playlist
+
     @xc.on_disconnect do
       @views.each do |view|
         view.on_server_disconnect!
@@ -206,7 +210,6 @@ Copyright: (c) 2010 Rémi Vanicat
   def unregister_connection_watcher(view)
     @views.delete(view)
   end
-
 #+end_src
 
 ** We need to know follow the server as some things update
@@ -294,8 +297,42 @@ Copyright: (c) 2010 Rémi Vanicat
       true
     end
   end
-#+end_src
 
+#+end_src
+** Playlist handling
+   :PROPERTIES:
+   :ID:       7e5da35c-6173-4570-b9ac-8c4519ad032a
+   :END:
+#+source: playlist-handling
+#+begin_src ruby
+  PLAYLIST_REMOVE = 3
+  PLAYLIST_CREATE = 0
+
+  def initialize_playlist
+    @playlist_list = nil
+    @xc.playlist_list.notifier do |res|
+      @playlist_list  = res.sort!
+      true
+    end
+
+    @xc.broadcast_coll_changed.notifier do |res|
+      if res[:namespace] == "Playlists"
+        if res[:type] == PLAYLIST_REMOVE
+          @playlist_list.delete(res[:name])
+        elsif res[:type] == PLAYLIST_CREATE
+          @playlist_list << res[:name]
+          @playlist_list.sort!
+        end
+      end
+      true
+    end
+  end
+
+
+  def playlist_list
+    @playlist_list
+  end
+#+end_src
 ** To be worth something, we know change things on the server
    :PROPERTIES:
    :ID:       58a0ff3e-3da5-405d-afa1-8ad2e33165cb
@@ -782,7 +819,6 @@ Copyright: (c) 2010 Rémi Vanicat
     end
   end
 #+end_src
-
 
 * Connecting the dot, and running all this
   :PROPERTIES:
