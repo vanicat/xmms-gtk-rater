@@ -574,7 +574,7 @@ class UserInteract
         menu.append(item)
       end
 
-      item = Gtk::MenuItem.new("_Add to playlist")
+      item = Gtk::MenuItem.new("Add to _playlist")
       menu.signal_connect("show") do
         item.submenu = playlist_menu do |pl|
           current_iters.each do |iter|
