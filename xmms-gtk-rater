@@ -381,25 +381,48 @@ end
 
 class SongListCollection < SongList
 
+  SORT_DEFAULT = [ COL_ID ]
+  SORT_ARTIST = [ COL_ARTIST, COL_ALBUM, COL_TITLE, COL_ID ]
+  SORT_ALBUM = [ COL_ALBUM, COL_TITLE, COL_ID ]
+  SORT_TITLE = [ COL_TITLE, COL_ARTIST, COL_ALBUM, COL_ID ]
+
+  def cmp_iter(iter1,iter2,cols)
+    c = cols.collect do |col|
+      if iter1[col] and iter2[col]
+        iter1[col] <=> iter2[col]
+      elsif iter1[col]
+        -1
+      elsif iter2[col]
+        1
+      elsif
+        0
+      end
+    end
+
+    c.reject { |i| i==0 }
+
+    c[0] || 0
+  end
+
   def initialize(xc,coll)
     super(xc)
 
     @list.set_sort_column_id(COL_ID)
 
     @list.set_default_sort_func do |iter1, iter2|
-      iter1[COL_ID] <=> iter2[COL_ID]
+      cmp_iter(iter1,iter2,SORT_DEFAULT)
     end
 
     @list.set_sort_func(COL_ALBUM) do |iter1, iter2|
-      [iter1[COL_ALBUM], iter1[COL_TITLE], iter1[COL_ID]] <=> [iter2[COL_ALBUM], iter2[COL_TITLE], iter2[COL_ID]]
+      cmp_iter(iter1,iter2,SORT_ALBUM)
     end
 
     @list.set_sort_func(COL_TITLE) do |iter1, iter2|
-      [iter1[COL_TITLE], iter1[COL_ARTIST], iter1[COL_ALBUM], iter1[COL_ID]] <=> [iter2[COL_TITLE], iter2[COL_ARTIST], iter2[COL_ALBUM], iter2[COL_ID]]
+      cmp_iter(iter1,iter2,SORT_TITLE)
     end
 
     @list.set_sort_func(COL_ARTIST) do |iter1, iter2|
-      [iter1[COL_ARTIST], iter1[COL_ALBUM], iter1[COL_TITLE], iter1[COL_ID]] <=> [iter2[COL_ARTIST], iter2[COL_ALBUM], iter2[COL_TITLE], iter2[COL_ID]]
+      cmp_iter(iter1,iter2,SORT_ARTIST)
     end
 
 
