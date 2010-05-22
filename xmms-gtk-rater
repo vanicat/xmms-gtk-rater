@@ -665,6 +665,16 @@ class UserInteract
   def action_menu
     unless @action_menu
       menu = Gtk::Menu.new
+
+      unless main?
+        item = Gtk::MenuItem.new("_Reload")
+        item.signal_connect("activate") {
+          @slist.reload!
+        }
+        menu.append(item)
+      end
+
+
       item = Gtk::MenuItem.new("Show same _artist")
       item.signal_connect("activate") {
         user_same(@slist.xi, "artist", current_iter[SongList::COL_ARTIST])
