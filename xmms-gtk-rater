@@ -407,6 +407,8 @@ class SongListCollection < SongList
   def initialize(xc,coll)
     super(xc)
 
+    @coll = coll
+
     @list.set_sort_column_id(COL_ID)
 
     @list.set_default_sort_func do |iter1, iter2|
@@ -424,9 +426,17 @@ class SongListCollection < SongList
     @list.set_sort_func(COL_ARTIST) do |iter1, iter2|
       cmp_iter(iter1,iter2,SORT_ARTIST)
     end
+    load!
+  end
 
+  def reload!
+    list.clear
 
-    @xi.coll_each_song(coll) do |id, title, artist, album, rating|
+    load!
+  end
+
+  def load!
+    @xi.coll_each_song(@coll) do |id, title, artist, album, rating|
       append_song_info(id, title, artist, album, rating)
     end
   end
@@ -434,13 +444,13 @@ class SongListCollection < SongList
   def self.equal(xc, field, value)
     coll = Xmms::Collection.universe.equal(field, value)
 
-    return SongListCollection.new(xc, coll)
+    return self.new(xc, coll)
   end
 
   def self.parse(xc, pattern)
     coll = Xmms::Collection.parse(pattern)
 
-    return SongListCollection.new(xc, coll)
+    return self.new(xc, coll)
   end
 end
 
