@@ -660,7 +660,12 @@ Copyright: (c) 2010 Rémi Vanicat
    We look for duplicate inside a collection. It could be universe...
 #+source: list-for-duplicate
 #+begin_src ruby
-  class SongListDuplicate < SongList
+  class SongListDuplicate < SongListCollection
+
+    SORT_DEFAULT = [ COL_TITLE ]
+    SORT_ARTIST = [ COL_ARTIST, COL_TITLE, COL_ALBUM, COL_ID ]
+    SORT_ALBUM = [ COL_ALBUM, COL_TITLE, COL_ID ]
+    SORT_TITLE = [ COL_TITLE, COL_ARTIST, COL_ALBUM, COL_ID ]
 
     def field_value_cmp(a, b)
       if a
@@ -710,9 +715,11 @@ Copyright: (c) 2010 Rémi Vanicat
     end
 
     def initialize(xc,coll)
-      super(xc)
+      super(xc,coll)
+    end
 
-      @xi.coll_query_info(coll) do |songs|
+    def load!
+      @xi.coll_query_info(@coll) do |songs|
         if songs
           songs.sort! { |a,b| song_compare(a, b) }
 
@@ -733,19 +740,6 @@ Copyright: (c) 2010 Rémi Vanicat
           end
         end
       end
-
-    end
-
-    def self.equal(xc, field, value)
-      coll = Xmms::Collection.universe.equal(field, value)
-
-      return self.new(xc, coll)
-    end
-
-    def self.parse(xc, pattern)
-      coll = Xmms::Collection.parse(pattern)
-
-      return self.new(xc, coll)
     end
   end
 #+end_src
