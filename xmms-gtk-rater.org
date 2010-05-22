@@ -1063,5 +1063,7 @@ Copyright: (c) 2010 Rémi Vanicat
 
   user = UserInteract.new(SongListPlayed.new(XmmsInteract.new),"Xmms Rater", true)
 
+  $0 = "xmms-gtk-rater"
+
   Gtk.main
 #+end_src
