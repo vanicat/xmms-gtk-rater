@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 
 # [[id:febdc89b-bfbc-4782-bf53-8b19ff298cf4][block-2]]
 
@@ -276,8 +276,8 @@ class SongList
   end
 
   def set_song_infos(iter, id, title, artist, album, rating)
-    iter[COL_ID]=id
-    iter[COL_TITLE]=title || "UNKNOW"
+    iter.set_value(COL_ID,id)
+    iter.set_value(COL_TITLE,title || "UNKNOW")
     iter[COL_ARTIST]=artist || "UNKNOW"
     iter[COL_ALBUM]=album || "UNKNOW"
     update_rating(iter, rating)
