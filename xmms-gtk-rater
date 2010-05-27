@@ -555,6 +555,7 @@ class UserInteract
     @slist = slist
     @window = Gtk::Window.new()
     @window.title = title
+    @window.icon=Gdk::Pixbuf.new("/usr/share/pixmaps/xmms2.svg")
     @main = main
 
     @slist.register(self)
