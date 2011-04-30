@@ -44,7 +44,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
   :PROPERTIES:
   :ID:       febdc89b-bfbc-4782-bf53-8b19ff298cf4
   :END:
-#+begin_src ruby :tangle xmms-gtk-rater :noweb yes
+#+begin_src ruby :tangle xmms-gtk-rater :noweb yes :shebang #!/usr/bin/ruby
   # <<copyright>>
 
   # This code is wrote using org-mode's babel's litterate programing
