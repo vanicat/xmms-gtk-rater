@@ -765,7 +765,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
       @slist = slist
       @window = Gtk::Window.new()
       @window.title = title
-      @window.icon=Gdk::Pixbuf.new("/usr/share/pixmaps/xmms2.svg")
+      @window.icon=Gdk::Pixbuf.new("/usr/share/pixmaps/xmms2-48.png")
       @main = main
 
       @slist.register(self)
