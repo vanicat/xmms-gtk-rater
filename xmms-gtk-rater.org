@@ -1,7 +1,7 @@
 #+TITLE: Xmms Gtk Rater
 #+AUTHOR: Rémi Vanicat <vanicat@debian.org>
 
-Copyright: (c) 2010 Rémi Vanicat
+Copyright: (c) 2010, 2011 Rémi Vanicat
 
 * About
   This is a small gtk client for xmms2 that will allow you to easily
@@ -15,7 +15,7 @@ Copyright: (c) 2010 Rémi Vanicat
 
 #+source: copyright
 #+begin_src ruby
-  Copyright (c) 2010 Rémi Vanicat
+  Copyright (c) 2010,2011 Rémi Vanicat
 
   Permission is hereby granted, free of charge, to any person obtaining a
   copy of this software and associated documentation files (the "Software"),

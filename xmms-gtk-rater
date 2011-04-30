@@ -1,8 +1,6 @@
 #!/usr/bin/ruby
 
-# [[id:febdc89b-bfbc-4782-bf53-8b19ff298cf4][block-2]]
-
-# Copyright (c) 2010 Rémi Vanicat
+# Copyright (c) 2010,2011 Rémi Vanicat
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
