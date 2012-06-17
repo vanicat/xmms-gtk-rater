@@ -1,7 +1,7 @@
 #+TITLE: Xmms Gtk Rater
 #+AUTHOR: Rémi Vanicat <vanicat@debian.org>
 
-Copyright: (c) 2010, 2011 Rémi Vanicat
+Copyright: (c) 2010, 2011, 2012 Rémi Vanicat
 
 * About
   This is a small gtk client for xmms2 that will allow you to easily
@@ -13,9 +13,9 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :ID:       400dffa3-3529-4583-b776-af98d7d5610e
    :END:
 
-#+source: copyright
-#+begin_src ruby
-  Copyright (c) 2010,2011 Rémi Vanicat
+#+name: copyright
+#+begin_src text
+  Copyright (c) 2010, 2011, 2012 Rémi Vanicat
 
   Permission is hereby granted, free of charge, to any person obtaining a
   copy of this software and associated documentation files (the "Software"),
@@ -30,10 +30,9 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-  SOFTWARE IN THE PUBLIC INTEREST, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR
-  OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-  ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-  DEALINGS IN THE SOFTWARE.
+  REMI VANICAT BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
   Except as contained in this notice, the name of Rémi Vanicat shall not be
   used in advertising or otherwise to promote the sale, use or other dealings
@@ -44,7 +43,8 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
   :PROPERTIES:
   :ID:       febdc89b-bfbc-4782-bf53-8b19ff298cf4
   :END:
-#+begin_src ruby :tangle xmms-gtk-rater :noweb yes :shebang #!/usr/bin/ruby
+#+name: main
+#+begin_src ruby :tangle xmms-gtk-rater :noweb tangle :shebang #!/usr/bin/ruby
   # <<copyright>>
 
   # This code is wrote using org-mode's babel's litterate programing
@@ -68,7 +68,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :ID:       303f4137-59ce-4c9f-810d-00f24548bafa
    :END:
 
-#+source: libraries
+#+name: libraries
 #+begin_src ruby
   require 'xmmsclient'
   require 'xmmsclient_glib'
@@ -81,7 +81,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
   :ID:       fcfd7d96-0af2-4d22-8484-150e53c6bd0d
   :END:
 
-#+source: xmms-extension
+#+name: xmms-extension
 #+begin_src ruby
   module Xmms
     class Collection
@@ -109,7 +109,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :PROPERTIES:
    :ID:       60333ece-ab83-4b09-b474-e04e9ea0606c
    :END:
-#+source: server-interaction
+#+name: server-interaction
 #+begin_src ruby :noweb yes
   class XmmsInteract
     <<reading-xmms-hash>>
@@ -128,10 +128,10 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
   end
 #+end_src
 
-#+source: reading-xmms-hash
+#+name: reading-xmms-hash
 #+begin_src ruby
   def get(info, attr, default=nil)
-    info[attr].map[0][1]
+    info[attr].to_a[0][1]
   rescue NoMethodError => e
     default
 
@@ -142,7 +142,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :PROPERTIES:
    :ID:       83142473-12ba-40ab-b4d8-9a9169b4db1f
    :END:
-#+source: initialization
+#+name: initialization
 #+begin_src ruby
   def initialize
     @looking_for_medialib_list = []
@@ -161,7 +161,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :ID:       acdc6116-8573-46f2-be35-c706c3d5f5b7
    :END:
    we connect, and reconnect.
-#+source: connection-handling
+#+name: connection-handling
 #+begin_src ruby
   def connect!
     begin
@@ -216,7 +216,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :PROPERTIES:
    :ID:       dd714d3f-82c4-4b7f-8a95-192083b8d9fc
    :END:
-#+source: watching-server-changes
+#+name: watching-server-changes
 #+begin_src ruby
   def looking_for_entry_change
     @xc.broadcast_medialib_entry_changed.notifier do |id|
@@ -270,7 +270,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :ID:       24ef7e44-c9d7-4014-a5a9-dae29e07ea7f
    :END:
 
-#+source: reading-server-information
+#+name: reading-server-information
 #+begin_src ruby
   def current_id(&body)
     @xc.playback_current_id.notifier do |id|
@@ -310,7 +310,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :PROPERTIES:
    :ID:       7e5da35c-6173-4570-b9ac-8c4519ad032a
    :END:
-#+source: playlist-handling
+#+name: playlist-handling
 #+begin_src ruby
   PLAYLIST_REMOVE = 3
   PLAYLIST_CREATE = 0
@@ -347,7 +347,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :PROPERTIES:
    :ID:       58a0ff3e-3da5-405d-afa1-8ad2e33165cb
    :END:
-#+source: changing-the-library
+#+name: changing-the-library
 #+begin_src ruby
   def erase_rating(id)
     @xc.medialib_entry_property_remove(id, :rating, "client/generic").notifier do
@@ -369,7 +369,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
   :PROPERTIES:
   :ID:       c4114fc3-2599-40c6-84cf-ecd2721700a0
   :END:
-#+source: songs-lists
+#+name: songs-lists
 #+begin_src ruby
   <<mother-song>>
 
@@ -384,7 +384,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :PROPERTIES:
    :ID:       5b0220e9-bb81-48d8-8a06-069dfffa82c8
    :END:
-#+source: mother-song
+#+name: mother-song
 #+begin_src ruby :noweb yes
   class SongList
     attr_reader :list
@@ -411,7 +411,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
     :PROPERTIES:
     :ID:       fd83eb5b-63ab-4973-bd16-643c31fae9cb
     :END:
-#+source: song-list-column
+#+name: song-list-column
 #+begin_src ruby
   COL_ID = 0
   COL_TITLE = 1
@@ -423,7 +423,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
     :PROPERTIES:
     :ID:       82627508-ee32-4975-86c9-6001aab246e0
     :END:
-#+source: life-and-death
+#+name: life-and-death
 #+begin_src ruby
   def initialize(xi)
     @xi = xi
@@ -445,7 +445,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
     :PROPERTIES:
     :ID:       dea10c92-9002-46d5-874c-e24486a4c716
     :END:
-#+source: update-songs
+#+name: update-songs
 #+begin_src ruby
   def set_song_infos(iter, id, title, artist, album, rating)
     iter.set_value(COL_ID,id)
@@ -482,7 +482,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
     :PROPERTIES:
     :ID:       cd2f74c4-9dac-463a-87f5-ced87c26625a
     :END:
-#+source: medialist-acting
+#+name: medialist-acting
 #+begin_src ruby :noweb yes
     def with_id(path,&body)
       if path.is_a? Gtk::TreeIter
@@ -508,7 +508,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
     :PROPERTIES:
     :ID:       1a3f6eee-4fb5-4305-bfa4-28d44e6cd65b
     :END:
-#+source: changing-rating
+#+name: changing-rating
 #+begin_src ruby
   def rate(path,rate)
     with_id(path) do |id|
@@ -520,7 +520,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
      :PROPERTIES:
      :ID:       e43e069d-4237-4b57-8ba8-6b89b92b194f
      :END:
-#+source: adding-toplaylist
+#+name: adding-toplaylist
 #+begin_src ruby
   def add_to_playlist(path, pl)
     with_id(path) do |id|
@@ -532,7 +532,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :PROPERTIES:
    :ID:       5a398c91-2d6a-4a5d-bbfc-4fca5fbaf3fa
    :END:
-#+source: list-for-played-song
+#+name: list-for-played-song
 #+begin_src ruby
   class SongListPlayed < SongList
     MAX_SONG = 50
@@ -574,7 +574,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :PROPERTIES:
    :ID:       1a9c3e24-0131-49f2-8df0-69d4a875b553
    :END:
-#+source: list-for-collection
+#+name: list-for-collection
 #+begin_src ruby
   class SongListCollection < SongList
 
@@ -656,7 +656,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
    :ID:       1756d1c1-8754-499e-85c0-ed9dd8b31d3b
    :END:
    We look for duplicate inside a collection. It could be universe...
-#+source: list-for-duplicate
+#+name: list-for-duplicate
 #+begin_src ruby
   class SongListDuplicate < SongListCollection
 
@@ -745,7 +745,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
   :PROPERTIES:
   :ID:       a344f483-0f1f-4fa9-8380-c0f01ffe11b9
   :END:
-#+source: user-interaction
+#+name: user-interaction
 #+begin_src ruby
   class UserInteract
 
@@ -1040,7 +1040,7 @@ Copyright: (c) 2010, 2011 Rémi Vanicat
   :PROPERTIES:
   :ID:       d7319434-31e9-41b7-a9e4-19759edaaaeb
   :END:
-#+source: runing-it
+#+name: runing-it
 #+begin_src ruby
   def user_same(xi,field,value)
     UserInteract.new(SongListCollection.equal(xi,field,value),
