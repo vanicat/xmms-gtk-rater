@@ -85,6 +85,17 @@ class XmmsInteract
   def connect!
     begin
       @xc = Xmms::Client.new('GtkRater').connect(ENV['XMMS_PATH'])
+      @xc.on_disconnect do
+        @views.each do |view|
+          view.on_server_disconnect!
+        end
+
+        unless reconnect!
+          GLib::Timeout.add_seconds(10) do
+            not reconnect!
+          end
+        end
+      end
     rescue Xmms::Client::ClientError
       return false
     end
@@ -96,18 +107,6 @@ class XmmsInteract
     looking_at_current_song
 
     initialize_playlist
-
-    @xc.on_disconnect do
-      @views.each do |view|
-        view.on_server_disconnect!
-      end
-
-      unless reconnect!
-        GLib::Timeout.add_seconds(10) do
-          not reconnect!
-        end
-      end
-    end
 
     return true
   end
